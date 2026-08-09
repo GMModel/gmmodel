@@ -28,7 +28,7 @@ export default function AdminContactPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-slate-900">Liên hệ</h1>
-      <p className="mt-1 text-sm text-slate-500">Tin nhắn khách gửi từ trang "Liên hệ".</p>
+      <p className="mt-1 text-sm text-slate-500">Tin nhắn khách gửi từ trang &quot;Liên hệ&quot;.</p>
 
       <div className="mt-6 flex flex-col gap-3">
         {messages === undefined ? null : messages.length === 0 ? (
