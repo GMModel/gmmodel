@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button:not(:disabled),
+[role="button"],
+a,
+label,
+select,
+summary {
+  cursor: pointer;
+}
+
+/* Light theme overrides — the site is authored dark-first with literal
+   Tailwind utility classes, so light mode is retrofitted by overriding
+   those same generated utility selectors under [data-theme="light"]. */
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="light"] .bg-black {
+  background-color: #ffffff !important;
+}
+html[data-theme="light"] .bg-neutral-950 {
+  background-color: #f6f6f7 !important;
+}
+html[data-theme="light"] .bg-neutral-900 {
+  background-color: #eef0f2 !important;
+}
+
+/* These base rules are intentionally unconditional (no :not(:hover)).
+   :hover applies to an element AND every ancestor containing the pointer,
+   not just the exact node under the cursor — so a card wrapper with a bare
+   text-white/border-white class enters :hover the instant the pointer is
+   anywhere inside it (e.g. over its title text or image), not just when
+   the wrapper itself is the intended hover target. Excluding :hover on the
+   base rule let that ancestor's override silently drop out on any inner
+   hover, leaving inherited/bare white text or borders invisible against
+   the light background. Instead, every hover: variant that must show a
+   different color is given its own explicit override below — since a
+   selector like .hover\:text-white:hover has higher specificity than the
+   plain .text-white base, it wins on hover regardless, with no fragile
+   :not(:hover) bookkeeping needed. */
+html[data-theme="light"] .text-white {
+  color: #111114 !important;
+}
+html[data-theme="light"] .text-white\/40 {
+  color: rgba(0, 0, 0, 0.4) !important;
+}
+html[data-theme="light"] .text-white\/50 {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+html[data-theme="light"] .text-white\/60 {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+html[data-theme="light"] .text-white\/70 {
+  color: rgba(0, 0, 0, 0.65) !important;
+}
+html[data-theme="light"] .text-white\/80 {
+  color: rgba(0, 0, 0, 0.75) !important;
+}
+
+html[data-theme="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+html[data-theme="light"] .border-white\/15 {
+  border-color: rgba(0, 0, 0, 0.13) !important;
+}
+html[data-theme="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+html[data-theme="light"] .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.2) !important;
+}
+html[data-theme="light"] .border-white\/40 {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+}
+html[data-theme="light"] .border-white\/50 {
+  border-color: rgba(0, 0, 0, 0.4) !important;
+}
+html[data-theme="light"] .border-white {
+  border-color: rgba(0, 0, 0, 0.7) !important;
+}
+html[data-theme="light"] .hover\:border-white\/40:hover {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+}
+html[data-theme="light"] .hover\:border-white\/50:hover {
+  border-color: rgba(0, 0, 0, 0.4) !important;
+}
+html[data-theme="light"] .hover\:border-white:hover {
+  border-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+html[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+html[data-theme="light"] .bg-white\/20 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+html[data-theme="light"] .bg-white\/30 {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+html[data-theme="light"] .hover\:bg-white\/10:hover,
+html[data-theme="light"] .hover\:bg-white\/20:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Wishlist heart button overlay on product thumbnails: a dark glass circle
+   reads fine on the dark theme's images, but turns into a flat muddy gray
+   once the tile background lightens — swap it for a light glass circle. */
+html[data-theme="light"] .bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+html[data-theme="light"] .hover\:bg-black\/70:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+html[data-theme="light"] .hover\:text-white:hover {
+  color: #111114 !important;
+}
+/* text-red-500 stays red in both themes; without this, the unconditional
+   .text-white rule above (!important) would beat the native, non-important
+   Tailwind hover:text-red-500 utility used by the wishlist heart icons. */
+html[data-theme="light"] .hover\:text-red-500:hover {
+  color: #ef4444 !important;
+}
+
+html[data-theme="light"] ::placeholder {
+  color: rgba(0, 0, 0, 0.4) !important;
+}

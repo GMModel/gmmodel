@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Brand {
+  id       Int       @id @default(autoincrement())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model Scale {
+  id       Int       @id @default(autoincrement())
+  slug     String    @unique
+  label    String
+  products Product[]
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  slug          String   @unique
+  category      String   @default("car")
+  nameEn        String
+  nameVi        String
+  descriptionEn String?
+  descriptionVi String?
+  descriptionEs String?
+  priceUsd      Float
+  compareAtUsd  Float?
+  imageColor    String
+  imageUrl      String?
+  galleryUrls   String[] @default([])
+  carBrand      String?
+  bodyStyle     String?
+  badge         String?
+  status        String?
+  stockQty      Int      @default(20)
+  brandId       Int
+  brand         Brand    @relation(fields: [brandId], references: [id])
+  scaleId       Int
+  scale         Scale    @relation(fields: [scaleId], references: [id])
+  isNewArrival  Boolean  @default(false)
+  isPreOrder    Boolean  @default(false)
+  isBestSeller  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  orderItems    OrderItem[]
+
+  @@index([category])
+  @@index([brandId])
+  @@index([scaleId])
+  @@index([isNewArrival])
+  @@index([isPreOrder])
+  @@index([isBestSeller])
+  @@index([createdAt])
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String?
+  googleId     String?   @unique
+  name         String
+  isAdmin      Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+  orders       Order[]
+  addresses    Address[]
+}
+
+model Address {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String
+  phone     String
+  address   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Coupon {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  type        String // "percent" | "fixed"
+  value       Float
+  active      Boolean   @default(true)
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  minOrderUsd Float?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  code          String      @unique
+  userId        Int?
+  user          User?       @relation(fields: [userId], references: [id])
+  email         String?
+  customerName  String
+  phone         String
+  address       String
+  totalUsd      Float
+  couponCode    String?
+  discountUsd   Float       @default(0)
+  paymentMethod     String
+  paymentStatus     String      @default("pending")
+  fulfillmentStatus String      @default("pending_confirmation")
+  providerRef       String?
+  items             OrderItem[]
+  createdAt         DateTime    @default(now())
+
+  @@index([userId])
+  @@index([fulfillmentStatus])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  nameVi    String
+  nameEn    String
+  priceUsd  Float
+  qty       Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
