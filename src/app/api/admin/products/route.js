@@ -78,6 +78,7 @@ export async function POST(request) {
       stockQty: body.stockQty !== undefined ? Math.max(0, Math.floor(Number(body.stockQty))) : 20,
       imageColor: body.imageColor || "#6b7280",
       imageUrl: body.imageUrl || null,
+      videoUrl: body.videoUrl || null,
       galleryUrls: Array.isArray(body.galleryUrls) ? body.galleryUrls.filter(Boolean) : [],
       carBrand: body.carBrand || null,
       bodyStyle: body.bodyStyle || null,

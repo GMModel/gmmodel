@@ -20,6 +20,7 @@ export default function ProductDetailClient({ params }) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [product, setProduct] = useState(undefined);
   const [added, setAdded] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     setProduct(undefined);
@@ -91,13 +92,23 @@ export default function ProductDetailClient({ params }) {
           <div className="mt-4 grid grid-cols-1 gap-8 md:grid-cols-2">
             <div>
               <div className="relative overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
-                <ModelThumb
-                  color={product.imageColor}
-                  src={product.imageUrl}
-                  alt={name}
-                  scaleLabel={product.scale?.label}
-                  className="h-80 w-full md:h-[420px]"
-                />
+                {showVideo && product.videoUrl ? (
+                  <video
+                    src={product.videoUrl}
+                    className="h-80 w-full object-contain md:h-[420px]"
+                    autoPlay
+                    controls
+                    playsInline
+                  />
+                ) : (
+                  <ModelThumb
+                    color={product.imageColor}
+                    src={product.imageUrl}
+                    alt={name}
+                    scaleLabel={product.scale?.label}
+                    className="h-80 w-full md:h-[420px]"
+                  />
+                )}
                 {product.badge ? (
                   <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-1 text-xs font-bold">{product.badge}</span>
                 ) : null}
@@ -114,15 +125,34 @@ export default function ProductDetailClient({ params }) {
                 </button>
               </div>
 
-              {product.galleryUrls?.length ? (
+              {product.videoUrl || product.galleryUrls?.length ? (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {product.galleryUrls.map((url, i) => (
+                  {product.videoUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowVideo(true)}
+                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded border bg-neutral-950 ${
+                        showVideo ? "border-red-500" : "border-white/10"
+                      }`}
+                    >
+                      <video src={product.videoUrl} className="h-full w-full object-contain" muted />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+                        <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                    </button>
+                  ) : null}
+                  {product.galleryUrls?.map((url, i) => (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       key={i}
                       src={url}
                       alt={`${name} ${i + 2}`}
-                      className="h-16 w-16 flex-shrink-0 rounded border border-white/10 bg-neutral-950 object-contain"
+                      onClick={() => setShowVideo(false)}
+                      className={`h-16 w-16 flex-shrink-0 cursor-pointer rounded border bg-neutral-950 object-contain ${
+                        !showVideo ? "border-red-500" : "border-white/10"
+                      }`}
                     />
                   ))}
                 </div>

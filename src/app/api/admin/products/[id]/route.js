@@ -35,6 +35,7 @@ export async function PATCH(request, { params }) {
   if (body.stockQty !== undefined) data.stockQty = Math.max(0, Math.floor(Number(body.stockQty)));
   if (body.imageColor !== undefined) data.imageColor = body.imageColor;
   if (body.imageUrl !== undefined) data.imageUrl = body.imageUrl || null;
+  if (body.videoUrl !== undefined) data.videoUrl = body.videoUrl || null;
   if (body.galleryUrls !== undefined) data.galleryUrls = Array.isArray(body.galleryUrls) ? body.galleryUrls.filter(Boolean) : [];
   if (body.carBrand !== undefined) data.carBrand = body.carBrand || null;
   if (body.bodyStyle !== undefined) data.bodyStyle = body.bodyStyle || null;

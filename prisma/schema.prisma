@@ -37,6 +37,7 @@ model Product {
   compareAtUsd  Float?
   imageColor    String
   imageUrl      String?
+  videoUrl      String?
   galleryUrls   String[] @default([])
   carBrand      String?
   bodyStyle     String?

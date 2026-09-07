@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { getCurrentAdmin } from "@/lib/auth";
 
-const MAX_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 
 export async function POST(request) {
   const admin = await getCurrentAdmin();
@@ -21,11 +23,17 @@ export async function POST(request) {
   if (!file || typeof file === "string") {
     return NextResponse.json({ error: "Không có file" }, { status: 400 });
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: "Chỉ hỗ trợ ảnh JPG, PNG, WEBP, GIF" }, { status: 400 });
+
+  const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
+  const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
+  if (!isVideo && !isImage) {
+    return NextResponse.json({ error: "Chỉ hỗ trợ ảnh JPG, PNG, WEBP, GIF hoặc video MP4, WEBM, MOV" }, { status: 400 });
   }
-  if (file.size > MAX_SIZE) {
+  if (isImage && file.size > MAX_IMAGE_SIZE) {
     return NextResponse.json({ error: "Ảnh vượt quá 5MB" }, { status: 400 });
+  }
+  if (isVideo && file.size > MAX_VIDEO_SIZE) {
+    return NextResponse.json({ error: "Video vượt quá 50MB" }, { status: 400 });
   }
 
   const ext = file.name.split(".").pop();
