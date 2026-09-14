@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAdmin } from "@/lib/auth";
+import { translateProductFields } from "@/lib/translate";
 
 const PAGE_SIZE = 20;
 
@@ -52,13 +53,18 @@ export async function POST(request) {
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await request.json();
-  const { nameVi, nameEn, priceUsd, brandId, scaleId } = body;
+  const { nameVi, priceUsd, brandId, scaleId } = body;
 
-  if (!nameVi || !nameEn || !priceUsd || !brandId || !scaleId) {
+  if (!nameVi || !priceUsd || !brandId || !scaleId) {
     return NextResponse.json({ error: "Thiếu thông tin bắt buộc" }, { status: 400 });
   }
 
-  let slug = body.slug?.trim() ? slugify(body.slug) : slugify(nameEn);
+  const { nameEn, descriptionEn, descriptionEs } = await translateProductFields({
+    nameVi,
+    descriptionVi: body.descriptionVi,
+  });
+
+  let slug = body.slug?.trim() ? slugify(body.slug) : slugify(nameVi);
   const existing = await prisma.product.findUnique({ where: { slug } });
   if (existing) {
     slug = `${slug}-${Date.now().toString(36)}`;
@@ -71,8 +77,8 @@ export async function POST(request) {
       nameVi,
       nameEn,
       descriptionVi: body.descriptionVi || null,
-      descriptionEn: body.descriptionEn || null,
-      descriptionEs: body.descriptionEs || null,
+      descriptionEn: descriptionEn || null,
+      descriptionEs: descriptionEs || null,
       priceUsd: Number(priceUsd),
       compareAtUsd: body.compareAtUsd ? Number(body.compareAtUsd) : null,
       stockQty: body.stockQty !== undefined ? Math.max(0, Math.floor(Number(body.stockQty))) : 20,

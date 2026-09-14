@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAdmin } from "@/lib/auth";
+import { translateProductFields } from "@/lib/translate";
 
 export async function GET(request, { params }) {
   const admin = await getCurrentAdmin();
@@ -26,10 +27,20 @@ export async function PATCH(request, { params }) {
   if (body.slug !== undefined) data.slug = body.slug;
   if (body.category !== undefined) data.category = body.category;
   if (body.nameVi !== undefined) data.nameVi = body.nameVi;
-  if (body.nameEn !== undefined) data.nameEn = body.nameEn;
   if (body.descriptionVi !== undefined) data.descriptionVi = body.descriptionVi || null;
-  if (body.descriptionEn !== undefined) data.descriptionEn = body.descriptionEn || null;
-  if (body.descriptionEs !== undefined) data.descriptionEs = body.descriptionEs || null;
+
+  if (body.nameVi !== undefined || body.descriptionVi !== undefined) {
+    const translated = await translateProductFields({
+      nameVi: body.nameVi,
+      descriptionVi: body.descriptionVi,
+    });
+    if (translated.nameEn !== undefined) data.nameEn = translated.nameEn;
+    if (translated.descriptionEn !== undefined) {
+      data.descriptionEn = translated.descriptionEn || null;
+      data.descriptionEs = translated.descriptionEs || null;
+    }
+  }
+
   if (body.priceUsd !== undefined) data.priceUsd = Number(body.priceUsd);
   if (body.compareAtUsd !== undefined) data.compareAtUsd = body.compareAtUsd ? Number(body.compareAtUsd) : null;
   if (body.stockQty !== undefined) data.stockQty = Math.max(0, Math.floor(Number(body.stockQty)));

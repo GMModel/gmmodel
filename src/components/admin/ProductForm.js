@@ -20,10 +20,7 @@ export default function ProductForm({ product }) {
   const [meta, setMeta] = useState({ brands: [], scales: [] });
   const [form, setForm] = useState({
     nameVi: product?.nameVi ?? "",
-    nameEn: product?.nameEn ?? "",
     descriptionVi: product?.descriptionVi ?? "",
-    descriptionEn: product?.descriptionEn ?? "",
-    descriptionEs: product?.descriptionEs ?? "",
     slug: product?.slug ?? "",
     category: product?.category ?? "car",
     brandId: product?.brandId ?? "",
@@ -156,20 +153,19 @@ export default function ProductForm({ product }) {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900">Thông tin cơ bản</h2>
+        <p className="mt-1 text-xs text-slate-400">
+          Chỉ cần nhập Tiếng Việt — bản Tiếng Anh và Tiếng Tây Ban Nha sẽ được AI tự động dịch khi lưu.
+        </p>
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Tên (Tiếng Việt) *</label>
+            <label className={labelClass}>Tên sản phẩm (Tiếng Việt) *</label>
             <input required value={form.nameVi} onChange={(e) => update("nameVi", e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Tên (Tiếng Anh) *</label>
-            <input required value={form.nameEn} onChange={(e) => update("nameEn", e.target.value)} className={inputClass} />
-          </div>
-          <div className="col-span-2">
-            <label className={labelClass}>Đường dẫn (slug) — để trống sẽ tự tạo từ tên tiếng Anh</label>
+            <label className={labelClass}>Đường dẫn (slug) — để trống sẽ tự tạo từ tên sản phẩm</label>
             <input value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="vd: ford-gt-yellow-1-24" />
           </div>
-          <div>
+          <div className="col-span-2">
             <label className={labelClass}>Mô tả chi tiết (Tiếng Việt)</label>
             <textarea
               rows={4}
@@ -177,26 +173,6 @@ export default function ProductForm({ product }) {
               onChange={(e) => update("descriptionVi", e.target.value)}
               className={inputClass}
               placeholder="Mô tả sản phẩm hiển thị ở trang chi tiết..."
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Mô tả chi tiết (Tiếng Anh)</label>
-            <textarea
-              rows={4}
-              value={form.descriptionEn}
-              onChange={(e) => update("descriptionEn", e.target.value)}
-              className={inputClass}
-              placeholder="Product description shown on the detail page..."
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Mô tả chi tiết (Tiếng Tây Ban Nha) — để trống sẽ dùng tạm bản tiếng Anh</label>
-            <textarea
-              rows={4}
-              value={form.descriptionEs}
-              onChange={(e) => update("descriptionEs", e.target.value)}
-              className={inputClass}
-              placeholder="Descripción del producto mostrada en la página de detalle..."
             />
           </div>
         </div>
