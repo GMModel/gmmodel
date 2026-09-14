@@ -101,11 +101,11 @@ export default function Header() {
       <div className="border-b border-white/10 px-4 py-2 md:px-8">
         <div className="mx-auto flex max-w-[1336px] items-center gap-4">
           <Link href="/" className="flex items-center md:hidden">
-            <img src="/logo.png" alt={t.brand} className="h-9 w-auto" />
+            <img src={theme === "light" ? "/logo-light.png" : "/logo.png"} alt={t.brand} className="h-9 w-auto" />
           </Link>
           <div className="hidden flex-1 items-center md:flex">
             <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt={t.brand} className="h-14 w-auto" />
+              <img src={theme === "light" ? "/logo-light.png" : "/logo.png"} alt={t.brand} className="h-14 w-auto" />
             </Link>
           </div>
           <form
