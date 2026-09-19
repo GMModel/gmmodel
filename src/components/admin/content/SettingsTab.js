@@ -81,7 +81,7 @@ export default function SettingsTab() {
       ) : (
         <div className="mt-6 space-y-6">
           {GROUPS.map((group) => (
-            <section key={group} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section key={group} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-bold">{group}</h2>
               <div className="mt-4 space-y-4">
                 {SETTING_FIELDS.filter((f) => f.group === group).map((f) => (

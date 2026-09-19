@@ -73,7 +73,7 @@ export default function AdminCouponsPage() {
       <h1 className="text-2xl font-bold text-slate-900">Mã giảm giá</h1>
       <p className="mt-1 text-sm text-slate-500">Tạo và quản lý mã giảm giá áp dụng ở trang thanh toán.</p>
 
-      <form onSubmit={handleCreate} className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form onSubmit={handleCreate} className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Tạo mã mới</h2>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3">
@@ -129,36 +129,36 @@ export default function AdminCouponsPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-xs text-slate-400">
-              <th className="px-5 py-3 font-medium">Mã</th>
-              <th className="px-5 py-3 font-medium">Giảm</th>
-              <th className="px-5 py-3 font-medium">Đã dùng</th>
-              <th className="px-5 py-3 font-medium">Đơn tối thiểu</th>
-              <th className="px-5 py-3 font-medium">Hết hạn</th>
-              <th className="px-5 py-3 font-medium">Kích hoạt</th>
-              <th className="px-5 py-3 font-medium"></th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Mã</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Giảm</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Đã dùng</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Đơn tối thiểu</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Hết hạn</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Kích hoạt</th>
+              <th className="px-3 py-3 sm:px-5 font-medium"></th>
             </tr>
           </thead>
           <tbody>
             {!loading && coupons.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-8 text-center text-sm text-slate-400">
+                <td colSpan={7} className="px-3 py-8 sm:px-5 text-center text-sm text-slate-400">
                   Chưa có mã giảm giá nào.
                 </td>
               </tr>
             ) : (
               coupons.map((c) => (
                 <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-5 py-3 font-mono font-semibold text-slate-900">{c.code}</td>
-                  <td className="px-5 py-3 text-slate-700">{formatValue(c)}</td>
-                  <td className="px-5 py-3 text-slate-600">
+                  <td className="px-3 py-3 sm:px-5 font-mono font-semibold text-slate-900">{c.code}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-700">{formatValue(c)}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">
                     {c.usedCount}
                     {c.maxUses ? ` / ${c.maxUses}` : ""}
                   </td>
-                  <td className="px-5 py-3 text-slate-600">{c.minOrderUsd ? `$${c.minOrderUsd.toFixed(2)}` : "—"}</td>
-                  <td className="px-5 py-3 text-slate-600">
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">{c.minOrderUsd ? `$${c.minOrderUsd.toFixed(2)}` : "—"}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">
                     {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString("vi-VN") : "—"}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <button
                       onClick={() => toggleActive(c)}
                       className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -168,7 +168,7 @@ export default function AdminCouponsPage() {
                       {c.active ? "Đang bật" : "Đã tắt"}
                     </button>
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-3 py-3 sm:px-5 text-right">
                     <button onClick={() => handleDelete(c)} className="text-xs font-semibold text-red-500 hover:text-red-700">
                       Xoá
                     </button>

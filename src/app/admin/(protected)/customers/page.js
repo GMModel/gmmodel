@@ -57,23 +57,23 @@ export default function AdminCustomersPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-xs text-slate-400">
-              <th className="px-5 py-3 font-medium">Khách hàng</th>
-              <th className="px-5 py-3 font-medium">Ngày tạo tài khoản</th>
-              <th className="px-5 py-3 font-medium">Số đơn hàng</th>
-              <th className="px-5 py-3 font-medium">Tổng chi tiêu</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Khách hàng</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Ngày tạo tài khoản</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Số đơn hàng</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Tổng chi tiêu</th>
             </tr>
           </thead>
           <tbody>
             {!loading && data.customers.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-sm text-slate-400">
+                <td colSpan={4} className="px-3 py-8 sm:px-5 text-center text-sm text-slate-400">
                   Chưa có khách hàng nào.
                 </td>
               </tr>
             ) : (
               data.customers.map((c) => (
                 <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <p className="font-medium text-slate-900">
                       {c.name}
                       {c.isAdmin ? (
@@ -82,9 +82,9 @@ export default function AdminCustomersPage() {
                     </p>
                     <p className="text-xs text-slate-400">{c.email}</p>
                   </td>
-                  <td className="px-5 py-3 text-slate-500">{new Date(c.createdAt).toLocaleDateString("vi-VN")}</td>
-                  <td className="px-5 py-3 text-slate-600">{c.orderCount}</td>
-                  <td className="px-5 py-3 font-medium text-slate-900">{formatUsd(c.totalSpentUsd)}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-500">{new Date(c.createdAt).toLocaleDateString("vi-VN")}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">{c.orderCount}</td>
+                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatUsd(c.totalSpentUsd)}</td>
                 </tr>
               ))
             )}

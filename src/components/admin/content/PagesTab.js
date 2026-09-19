@@ -58,7 +58,7 @@ function DocEditor({ initial, isCustom, saving, message, onSave, onReset }) {
       <Message message={message} />
 
       <div className="mt-6 space-y-4">
-        <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-600">Tiêu đề trang</span>
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
@@ -70,7 +70,7 @@ function DocEditor({ initial, isCustom, saving, message, onSave, onReset }) {
         </section>
 
         {form.sections.map((s, i) => (
-          <section key={i} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section key={i} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <div className="flex items-end gap-2">
               <label className="block flex-1">
                 <span className="mb-1 block text-xs font-medium text-slate-600">Tiêu đề mục {i + 1}</span>

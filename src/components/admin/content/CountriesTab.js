@@ -79,7 +79,7 @@ export default function CountriesTab() {
       ) : (
         <div className="mt-6 space-y-4">
           {rows.map((r, i) => (
-            <section key={i} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section key={i} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
               <div className="grid gap-3 sm:grid-cols-4">
                 <label className="block">
                   <span className="mb-1 block text-xs font-medium text-slate-600">Tên (Tiếng Việt)</span>

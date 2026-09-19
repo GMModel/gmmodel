@@ -93,7 +93,7 @@ export default function FooterTab() {
         <p className="mt-8 text-sm text-slate-500">Đang tải…</p>
       ) : (
         <div className="mt-6 space-y-6">
-          <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-lg font-bold">Khối bên trái (tên, giới thiệu, liên hệ)</h3>
             <LocalizedInput label="Đoạn giới thiệu dưới tên shop (VN / US / ES)" rows={2} value={tagline} onChange={setTagline} />
             {settings && (
@@ -115,7 +115,7 @@ export default function FooterTab() {
             <p className="text-xs text-slate-500">Email và địa chỉ để trống thì không hiện ở chân trang.</p>
           </section>
           {columns.map((col, ci) => (
-            <section key={ci} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section key={ci} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <LocalizedInput label={`Tên cột ${ci + 1} (VN / US / ES)`} value={col.title} onChange={(title) => updateColumn(ci, { title })} />

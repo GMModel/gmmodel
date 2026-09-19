@@ -109,25 +109,25 @@ export default function AdminProductsPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-xs text-slate-400">
-              <th className="px-5 py-3 font-medium">Ảnh</th>
-              <th className="px-5 py-3 font-medium">Tên sản phẩm</th>
-              <th className="px-5 py-3 font-medium">Hãng / Tỉ lệ</th>
-              <th className="px-5 py-3 font-medium">Giá</th>
-              <th className="px-5 py-3 font-medium">Tồn kho</th>
-              <th className="px-5 py-3 font-medium"></th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Ảnh</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Tên sản phẩm</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Hãng / Tỉ lệ</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Giá</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Tồn kho</th>
+              <th className="px-3 py-3 sm:px-5 font-medium"></th>
             </tr>
           </thead>
           <tbody>
             {!loading && data.products.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-400">
+                <td colSpan={6} className="px-3 py-8 sm:px-5 text-center text-sm text-slate-400">
                   Chưa có sản phẩm nào.
                 </td>
               </tr>
             ) : (
               data.products.map((p) => (
                 <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <div
                       className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-slate-200"
                       style={{ backgroundColor: p.imageUrl ? undefined : p.imageColor }}
@@ -138,18 +138,18 @@ export default function AdminProductsPage() {
                       ) : null}
                     </div>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <p className="font-medium text-slate-900">{p.nameVi}</p>
                     <p className="text-xs text-slate-400">{p.slug}</p>
                   </td>
-                  <td className="px-5 py-3 text-slate-600">
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">
                     {p.brand?.name} · {p.scale?.label}
                   </td>
-                  <td className="px-5 py-3 text-slate-900">
+                  <td className="px-3 py-3 sm:px-5 text-slate-900">
                     {formatUsd(p.priceUsd)}
                     {p.compareAtUsd ? <span className="ml-1 text-xs text-slate-400 line-through">{formatUsd(p.compareAtUsd)}</span> : null}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     {p.isPreOrder ? (
                       <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">Đặt trước</span>
                     ) : p.stockQty <= 0 ? (
@@ -160,7 +160,7 @@ export default function AdminProductsPage() {
                       </span>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-3 py-3 sm:px-5 text-right">
                     <Link href={`/admin/products/${p.id}`} className="mr-3 text-xs font-semibold text-slate-600 hover:text-slate-900">
                       Sửa
                     </Link>

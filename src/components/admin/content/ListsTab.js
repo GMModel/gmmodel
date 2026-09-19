@@ -19,7 +19,7 @@ function effectiveList(overrides, locale, path) {
 function ListEditor({ spec, items, isCustom, onChange, onReset }) {
   const blank = Object.fromEntries(spec.fields.map((f) => [f.key, ""]));
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold">{spec.label}</h2>

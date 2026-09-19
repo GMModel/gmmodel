@@ -176,7 +176,7 @@ export default function TextTab() {
       ) : (
         <div className="mt-6 space-y-6">
           {visible.map(([section, fields]) => (
-            <section key={section} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section key={section} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-bold">{SECTION_LABELS[section] ?? section}</h2>
               <div className="mt-4 space-y-4">
                 {fields.map((f) => {

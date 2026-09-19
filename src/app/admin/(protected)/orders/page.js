@@ -113,35 +113,35 @@ export default function AdminOrdersPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-xs text-slate-400">
-              <th className="px-5 py-3 font-medium">Mã đơn</th>
-              <th className="px-5 py-3 font-medium">Ngày đặt</th>
-              <th className="px-5 py-3 font-medium">Khách hàng</th>
-              <th className="px-5 py-3 font-medium">Thanh toán</th>
-              <th className="px-5 py-3 font-medium">Trạng thái đơn</th>
-              <th className="px-5 py-3 font-medium">Tổng tiền</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Mã đơn</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Ngày đặt</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Khách hàng</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Thanh toán</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Trạng thái đơn</th>
+              <th className="px-3 py-3 sm:px-5 font-medium">Tổng tiền</th>
             </tr>
           </thead>
           <tbody>
             {!loading && data.orders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-400">
+                <td colSpan={6} className="px-3 py-8 sm:px-5 text-center text-sm text-slate-400">
                   Không tìm thấy đơn hàng nào.
                 </td>
               </tr>
             ) : (
               data.orders.map((order) => (
                 <tr key={order.code} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <Link href={`/admin/orders/${order.code}`} className="font-medium text-slate-900 hover:underline">
                       {order.code}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-slate-500">{new Date(order.createdAt).toLocaleDateString("vi-VN")}</td>
-                  <td className="px-5 py-3 text-slate-600">
+                  <td className="px-3 py-3 sm:px-5 text-slate-500">{new Date(order.createdAt).toLocaleDateString("vi-VN")}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">
                     {order.customerName}
                     <div className="text-xs text-slate-400">{order.phone}</div>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <p className="mb-1 text-xs text-slate-400">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</p>
                     <select
                       value={order.paymentStatus}
@@ -155,7 +155,7 @@ export default function AdminOrdersPage() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <select
                       value={order.fulfillmentStatus}
                       onChange={(e) => updateOrderStatus(order.code, { fulfillmentStatus: e.target.value })}
@@ -168,7 +168,7 @@ export default function AdminOrdersPage() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-5 py-3 font-medium text-slate-900">{formatUsd(order.totalUsd)}</td>
+                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatUsd(order.totalUsd)}</td>
                 </tr>
               ))
             )}

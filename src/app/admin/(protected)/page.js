@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div key={c.label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <p className="text-xs font-medium text-slate-500">{c.label}</p>
             <p className={`mt-2 text-2xl font-bold ${c.highlight ? "text-amber-600" : "text-slate-900"}`}>{c.value}</p>
           </div>
@@ -53,34 +53,34 @@ export default function AdminDashboardPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs text-slate-400">
-                <th className="px-5 py-3 font-medium">Mã đơn</th>
-                <th className="px-5 py-3 font-medium">Khách hàng</th>
-                <th className="px-5 py-3 font-medium">Thanh toán</th>
-                <th className="px-5 py-3 font-medium">Trạng thái</th>
-                <th className="px-5 py-3 font-medium">Tổng tiền</th>
+                <th className="px-3 py-3 sm:px-5 font-medium">Mã đơn</th>
+                <th className="px-3 py-3 sm:px-5 font-medium">Khách hàng</th>
+                <th className="px-3 py-3 sm:px-5 font-medium">Thanh toán</th>
+                <th className="px-3 py-3 sm:px-5 font-medium">Trạng thái</th>
+                <th className="px-3 py-3 sm:px-5 font-medium">Tổng tiền</th>
               </tr>
             </thead>
             <tbody>
               {stats?.recentOrders?.map((order) => (
                 <tr key={order.code} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5">
                     <Link href={`/admin/orders/${order.code}`} className="font-medium text-slate-900 hover:underline">
                       {order.code}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-slate-600">{order.customerName}</td>
-                  <td className="px-5 py-3 text-slate-600">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">{order.customerName}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</td>
+                  <td className="px-3 py-3 sm:px-5">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${FULFILLMENT_STATUS_COLORS[order.fulfillmentStatus]}`}>
                       {FULFILLMENT_STATUS_LABELS[order.fulfillmentStatus]}
                     </span>
                   </td>
-                  <td className="px-5 py-3 font-medium text-slate-900">{formatUsd(order.totalUsd)}</td>
+                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatUsd(order.totalUsd)}</td>
                 </tr>
               ))}
               {stats && stats.recentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={5} className="px-3 py-8 sm:px-5 text-center text-sm text-slate-400">
                     Chưa có đơn hàng nào.
                   </td>
                 </tr>

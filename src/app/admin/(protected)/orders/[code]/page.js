@@ -75,9 +75,9 @@ export default function AdminOrderDetailPage({ params }) {
       </div>
       <p className="text-sm text-slate-500">{new Date(order.createdAt).toLocaleString("vi-VN")}</p>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="min-w-0 lg:col-span-2">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900">Sản phẩm</h2>
             <div className="mt-3 flex flex-col divide-y divide-slate-100">
               {order.items.map((item) => (
@@ -102,7 +102,7 @@ export default function AdminOrderDetailPage({ params }) {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900">Trạng thái vận chuyển</h2>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {FULFILLMENT_ORDER.map((step, i) => (
@@ -135,31 +135,31 @@ export default function AdminOrderDetailPage({ params }) {
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900">Khách hàng</h2>
             <dl className="mt-3 flex flex-col gap-2 text-sm">
               <div>
                 <dt className="text-xs text-slate-400">Họ tên</dt>
-                <dd className="text-slate-800">{order.customerName}</dd>
+                <dd className="break-words text-slate-800">{order.customerName}</dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-400">Số điện thoại</dt>
-                <dd className="text-slate-800">{order.phone}</dd>
+                <dd className="break-words text-slate-800">{order.phone}</dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-400">Địa chỉ</dt>
-                <dd className="text-slate-800">{order.address}</dd>
+                <dd className="break-words text-slate-800">{order.address}</dd>
               </div>
               {order.email ? (
                 <div>
                   <dt className="text-xs text-slate-400">Email</dt>
-                  <dd className="text-slate-800">{order.email}</dd>
+                  <dd className="break-words text-slate-800">{order.email}</dd>
                 </div>
               ) : null}
               {order.user ? (
                 <div>
                   <dt className="text-xs text-slate-400">Tài khoản</dt>
-                  <dd className="text-slate-800">{order.user.name} ({order.user.email})</dd>
+                  <dd className="break-words text-slate-800">{order.user.name} ({order.user.email})</dd>
                 </div>
               ) : (
                 <div>
@@ -170,7 +170,7 @@ export default function AdminOrderDetailPage({ params }) {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900">Thanh toán</h2>
             <p className="mt-2 text-sm text-slate-600">
               Phương thức: <span className="font-medium text-slate-900">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</span>

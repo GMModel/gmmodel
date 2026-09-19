@@ -39,7 +39,7 @@ export default function AdminContactPage() {
           messages.map((m) => (
             <div
               key={m.id}
-              className={`rounded-xl border bg-white p-5 shadow-sm ${
+              className={`rounded-xl border bg-white p-4 shadow-sm sm:p-5 ${
                 m.status === "new" ? "border-red-200" : "border-slate-200"
               }`}
             >

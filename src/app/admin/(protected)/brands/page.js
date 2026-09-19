@@ -34,7 +34,7 @@ function ManageList({ title, items, onAdd, onRename, onDelete, placeholder, item
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <h2 className="text-sm font-bold text-slate-900">{title}</h2>
 
       {error ? <p className="mt-2 text-xs text-red-500">{error}</p> : null}
@@ -51,12 +51,12 @@ function ManageList({ title, items, onAdd, onRename, onDelete, placeholder, item
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleRename(item.id)}
-                  className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm outline-none focus:border-slate-900"
+                  className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm outline-none focus:border-slate-900"
                 />
               ) : (
-                <span className="text-sm text-slate-700">
+                <span className="min-w-0 break-words text-sm text-slate-700">
                   {itemLabel(item)}
-                  <span className="ml-2 text-xs text-slate-400">({item._count?.products ?? 0} sản phẩm)</span>
+                  <span className="ml-2 whitespace-nowrap text-xs text-slate-400">({item._count?.products ?? 0} sản phẩm)</span>
                 </span>
               )}
               <div className="flex flex-shrink-0 gap-3 text-xs font-semibold">
@@ -96,7 +96,7 @@ function ManageList({ title, items, onAdd, onRename, onDelete, placeholder, item
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900"
+          className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900"
         />
         <button
           type="submit"
@@ -192,7 +192,7 @@ export default function AdminBrandsPage() {
       {loading ? (
         <p className="mt-6 text-sm text-slate-400">Đang tải...</p>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-6">
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <ManageList
             title="Hãng sản xuất"
             items={brands}

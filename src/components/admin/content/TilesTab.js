@@ -34,7 +34,7 @@ function TileEditor({ tile, onChange, onError, actions, showTag }) {
 function TileList({ title, hint, items, onChange, onError }) {
   const blank = { label: { vi: "", en: "", es: "" }, imageUrl: "", link: "", color: "#374151" };
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold">{title}</h2>
@@ -133,7 +133,7 @@ export default function TilesTab() {
         <p className="mt-8 text-sm text-slate-500">Đang tải…</p>
       ) : (
         <div className="mt-6 space-y-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-lg font-bold">Ô nổi bật (ô lớn bên trái)</h2>
             <div className="mt-4">
               <TileEditor tile={data.featured} showTag onError={onError} onChange={(featured) => setData({ ...data, featured })} />
@@ -153,7 +153,7 @@ export default function TilesTab() {
             onError={onError}
             onChange={(brandTiles) => setData({ ...data, brandTiles })}
           />
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-slate-600">
                 Link của nút &quot;Xem tất cả mô hình&quot; (chữ của nút sửa ở mục Nội dung → browseAll)

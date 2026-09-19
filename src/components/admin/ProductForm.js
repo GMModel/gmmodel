@@ -151,7 +151,7 @@ export default function ProductForm({ product }) {
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
       ) : null}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Thông tin cơ bản</h2>
         <p className="mt-1 text-xs text-slate-400">
           Chỉ cần nhập Tiếng Việt — bản Tiếng Anh và Tiếng Tây Ban Nha sẽ được AI tự động dịch khi lưu.
@@ -165,7 +165,7 @@ export default function ProductForm({ product }) {
             <label className={labelClass}>Đường dẫn (slug) — để trống sẽ tự tạo từ tên sản phẩm</label>
             <input value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="vd: ford-gt-yellow-1-24" />
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <label className={labelClass}>Mô tả chi tiết (Tiếng Việt)</label>
             <textarea
               rows={4}
@@ -178,7 +178,7 @@ export default function ProductForm({ product }) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Phân loại</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -229,7 +229,7 @@ export default function ProductForm({ product }) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Giá &amp; Tồn kho</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -258,9 +258,9 @@ export default function ProductForm({ product }) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Ảnh đại diện</h2>
-        <div className="mt-4 flex items-start gap-4">
+        <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row">
           <div className="flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
             {form.imageUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
@@ -269,8 +269,8 @@ export default function ProductForm({ product }) {
               <span className="text-xs text-slate-400">Chưa có ảnh</span>
             )}
           </div>
-          <div className="flex-1">
-            <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} className="text-sm" />
+          <div className="w-full min-w-0 flex-1">
+            <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} className="w-full max-w-full text-sm" />
             {uploading ? <p className="mt-1 text-xs text-slate-400">Đang tải ảnh lên...</p> : null}
             <div className="mt-3">
               <label className={labelClass}>Hoặc dán URL ảnh</label>
@@ -284,10 +284,10 @@ export default function ProductForm({ product }) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Video sản phẩm</h2>
         <p className="mt-1 text-xs text-slate-400">Video sẽ hiển thị đầu tiên ở trang chi tiết sản phẩm và tự động phát khi khách bấm vào.</p>
-        <div className="mt-4 flex items-start gap-4">
+        <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row">
           <div className="flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
             {form.videoUrl ? (
               <video src={form.videoUrl} className="h-full w-full object-contain" muted />
@@ -295,8 +295,8 @@ export default function ProductForm({ product }) {
               <span className="text-xs text-slate-400">Chưa có video</span>
             )}
           </div>
-          <div className="flex-1">
-            <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleVideoUpload} disabled={uploading} className="text-sm" />
+          <div className="w-full min-w-0 flex-1">
+            <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleVideoUpload} disabled={uploading} className="w-full max-w-full text-sm" />
             {uploading ? <p className="mt-1 text-xs text-slate-400">Đang tải lên...</p> : null}
             <p className="mt-1 text-xs text-slate-400">MP4, WEBM hoặc MOV, tối đa 50MB.</p>
             <div className="mt-3">
@@ -316,7 +316,7 @@ export default function ProductForm({ product }) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Thư viện ảnh (thêm ảnh)</h2>
         <p className="mt-1 text-xs text-slate-400">Các ảnh phụ hiển thị thêm ở trang chi tiết sản phẩm.</p>
         <div className="mt-4 flex flex-wrap gap-3">
@@ -334,10 +334,10 @@ export default function ProductForm({ product }) {
             </div>
           ))}
         </div>
-        <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} className="mt-3 text-sm" />
+        <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} className="mt-3 w-full max-w-full text-sm" />
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Nhãn hiển thị</h2>
         <div className="mt-4">
           <label className={labelClass}>Nhãn góc ảnh (vd: NEW, HOT, LAST ONE)</label>
@@ -359,7 +359,7 @@ export default function ProductForm({ product }) {
         </div>
       </div>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="submit"
           disabled={saving || uploading}
