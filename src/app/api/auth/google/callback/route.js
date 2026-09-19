@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getGoogleRedirectUri } from "@/lib/googleOAuth";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 
@@ -19,7 +20,7 @@ export async function GET(request) {
     return NextResponse.redirect(new URL("/login?error=google_state", request.url));
   }
 
-  const redirectUri = new URL("/api/auth/google/callback", request.url).toString();
+  const redirectUri = getGoogleRedirectUri(request);
 
   try {
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {

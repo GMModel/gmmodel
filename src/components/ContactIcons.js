@@ -1,16 +1,18 @@
 "use client";
 
 import { useStore } from "@/context/StoreContext";
+import { phoneDigits } from "@/lib/contentUtils";
 
-const PHONE_INTL = "84347347823"; // +84 347 347 823, no leading 0, no "+"
-const PHONE_DISPLAY = "+84 347 347 823";
-
-function buildLinks(t) {
+function buildLinks(t, settings) {
+  const PHONE_DISPLAY = settings.phone;
+  const PHONE_INTL = phoneDigits(settings.phone);
+  const ZALO_INTL = phoneDigits(settings.zalo) || PHONE_INTL;
+  const WA_INTL = phoneDigits(settings.whatsapp) || PHONE_INTL;
   return [
     {
       label: "Zalo",
       tooltip: t.contactIcons.zalo,
-      href: `https://zalo.me/${PHONE_INTL}`,
+      href: `https://zalo.me/${ZALO_INTL}`,
       bg: "bg-[#0068ff]",
       icon: (
         <svg viewBox="0 0 48 48" className="h-4 w-4" fill="none">
@@ -23,7 +25,7 @@ function buildLinks(t) {
     {
       label: "WhatsApp",
       tooltip: t.contactIcons.whatsapp,
-      href: `https://wa.me/${PHONE_INTL}`,
+      href: `https://wa.me/${WA_INTL}`,
       bg: "bg-[#25D366]",
       icon: (
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="white">
@@ -47,8 +49,8 @@ function buildLinks(t) {
 }
 
 export default function ContactIcons() {
-  const { t } = useStore();
-  const LINKS = buildLinks(t);
+  const { t, settings } = useStore();
+  const LINKS = buildLinks(t, settings);
 
   return (
     <div className="flex flex-row gap-1.5 rounded-full bg-white p-1.5 shadow-xl sm:flex-col">

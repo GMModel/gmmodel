@@ -5,20 +5,18 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import ProductCard from "./ProductCard";
-import { BRAND_LIST } from "@/lib/brands";
-import { COUNTRY_GROUPS } from "@/lib/carBrands";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 import { pickLabel } from "@/lib/i18n";
 
-const TAB_KEYS = ["new", "preorder", "bestseller", "all", "1-12", "1-18", "1-24", "1-32", "1-43"];
-const SCALE_KEYS = ["1-12", "1-18", "1-24", "1-32", "1-43"];
 const DIRECT_TAB_KEYS = ["bestseller", "all"];
-const BRAND_SLUGS = BRAND_LIST.map((b) => b.slug);
-const COUNTRY_SLUGS = COUNTRY_GROUPS.map((g) => g.slug);
 const BODY_STYLE_SLUGS = BODY_STYLES.map((s) => s.slug);
 
 export default function ProductSection({ initialProducts = [] }) {
-  const { t, locale } = useStore();
+  const { t, locale, brandList, scales, countryGroups, scaleLabel } = useStore();
+  const SCALE_KEYS = scales.map((s) => s.slug);
+  const TAB_KEYS = ["new", "preorder", "bestseller", "all", ...SCALE_KEYS];
+  const BRAND_SLUGS = brandList.map((b) => b.slug);
+  const COUNTRY_SLUGS = countryGroups.map((g) => g.slug);
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("new");
   const [activeBrand, setActiveBrand] = useState(null);
@@ -90,7 +88,7 @@ export default function ProductSection({ initialProducts = [] }) {
                 activeTab === key ? "bg-white text-black" : "bg-white/10 text-white/70 hover:bg-white/20"
               }`}
             >
-              {t.productSection.tabs[key]}
+              {t.productSection.tabs[key] ?? scaleLabel(key)}
             </button>
           ))}
         </div>
@@ -106,7 +104,7 @@ export default function ProductSection({ initialProducts = [] }) {
           >
             {t.productSection.brandFilterLabel}
           </button>
-          {BRAND_LIST.map((b) => (
+          {brandList.map((b) => (
             <button
               key={b.slug}
               onClick={() => setActiveBrand(b.slug)}
@@ -132,7 +130,7 @@ export default function ProductSection({ initialProducts = [] }) {
           >
             {t.productSection.carBrandFilterLabel}
           </button>
-          {COUNTRY_GROUPS.map((group) => (
+          {countryGroups.map((group) => (
             <button
               key={group.slug}
               onClick={() => setActiveCountry(group.slug)}

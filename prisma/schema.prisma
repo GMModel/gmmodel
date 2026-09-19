@@ -164,3 +164,9 @@ model Session {
 
   @@index([userId])
 }
+
+model SiteContent {
+  locale    String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+}

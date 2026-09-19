@@ -6,24 +6,40 @@ import { useStore } from "@/context/StoreContext";
 import ModelThumb from "./ModelThumb";
 import { SAMPLE_IMAGES } from "@/lib/sampleImages";
 
-const HERO_IMAGES = [SAMPLE_IMAGES[2], SAMPLE_IMAGES[4], SAMPLE_IMAGES[3]];
+const DEFAULT_SLIDES = [SAMPLE_IMAGES[2], SAMPLE_IMAGES[4], SAMPLE_IMAGES[3]].map((imageUrl) => ({
+  imageUrl,
+  link: "",
+  alt: "Mô hình xe kim loại diecast chính hãng tại GM Model",
+}));
 const HERO_COLORS = ["#dc2626", "#ca8a04", "#1d4ed8"];
 
 export default function Hero() {
-  const { t } = useStore();
+  const { t, banners, settings } = useStore();
+  const slides = banners.length > 0 ? banners : DEFAULT_SLIDES;
   const slide = t.hero.slides[0];
   const [imgIndex, setImgIndex] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setImgIndex((i) => (i + 1) % HERO_IMAGES.length);
+      setImgIndex((i) => (i + 1) % slides.length);
     }, 4000);
     return () => clearInterval(id);
-  }, []);
+  }, [slides.length]);
 
   function goTo(i) {
-    setImgIndex((i + HERO_IMAGES.length) % HERO_IMAGES.length);
+    setImgIndex((i + slides.length) % slides.length);
   }
+
+  const current = slides[imgIndex % slides.length];
+  const image = (
+    <ModelThumb
+      color={HERO_COLORS[imgIndex % HERO_COLORS.length]}
+      src={current.imageUrl}
+      alt={current.alt || "GM Model"}
+      priority
+      className="h-56 w-full md:h-72"
+    />
+  );
 
   return (
     <section className="bg-black px-4 py-10 text-white md:px-8 md:py-16">
@@ -32,23 +48,17 @@ export default function Hero() {
           <h1 className="text-xl font-bold tracking-tight md:text-4xl md:font-black">{slide.title}</h1>
           <p className="mt-4 max-w-md text-sm text-white/70">{slide.body}</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/products" className="rounded bg-red-600 px-5 py-3 text-sm font-semibold hover:bg-red-500">
+            <Link href={settings.heroLink1 || "/products"} className="rounded bg-red-600 px-5 py-3 text-sm font-semibold hover:bg-red-500">
               {slide.cta1}
             </Link>
-            <Link href="/sale" className="rounded border border-white/30 px-5 py-3 text-sm font-semibold hover:border-white">
+            <Link href={settings.heroLink2 || "/sale"} className="rounded border border-white/30 px-5 py-3 text-sm font-semibold hover:border-white">
               {slide.cta2}
             </Link>
           </div>
         </div>
         <div>
           <div className="overflow-hidden rounded-lg">
-            <ModelThumb
-              color={HERO_COLORS[imgIndex]}
-              src={HERO_IMAGES[imgIndex]}
-              alt="Mô hình xe kim loại diecast chính hãng tại GM Model"
-              priority
-              className="h-56 w-full md:h-72"
-            />
+            {current.link ? <Link href={current.link}>{image}</Link> : image}
           </div>
           <div className="mt-4 flex items-center justify-center gap-3">
             <button
@@ -60,7 +70,7 @@ export default function Hero() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            {HERO_IMAGES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 aria-label={`go to image ${i + 1}`}

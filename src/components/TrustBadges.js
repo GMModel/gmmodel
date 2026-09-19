@@ -22,7 +22,7 @@ export default function TrustBadges() {
           <div key={item.title} className="rounded-lg bg-neutral-950 p-5">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-950 text-red-500">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {ICONS[i]}
+                {ICONS[i % ICONS.length]}
               </svg>
             </div>
             <div className="text-sm font-bold">{item.title}</div>

@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
 
-const CAR_BRANDS = ["Mercedes-Benz", "Porsche", "BMW", "Ferrari", "Lamborghini", "Bentley", "Aston Martin", "Bugatti"];
-const MANUFACTURERS = ["Norev", "Minichamps", "GT Spirit", "Otto Mobile", "IXO", "MCG", "Che Zhi"];
 
 export default function BrandsGuideSection() {
-  const { t } = useStore();
+  const { t, brandList, countryGroups } = useStore();
+  // Car makes come from the origin groups (Admin → Xuất xứ xe); manufacturers from Admin → Hãng & Tỉ lệ.
+  const carBrands = [...new Set(countryGroups.flatMap((g) => g.brands))].slice(0, 8);
 
   return (
     <section className="bg-neutral-900 px-4 py-12 text-white md:px-8">
@@ -19,10 +20,10 @@ export default function BrandsGuideSection() {
             <span className="text-red-500">●</span> {t.brandsGuide.byCarBrand}
           </div>
           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-white/80">
-            {CAR_BRANDS.map((b) => (
-              <a key={b} href="#" className="hover:text-white">
+            {carBrands.map((b) => (
+              <Link key={b} href={`/products?q=${encodeURIComponent(b)}`} className="hover:text-white">
                 {b}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -31,10 +32,10 @@ export default function BrandsGuideSection() {
             <span className="text-red-500">◆</span> {t.brandsGuide.byManufacturer}
           </div>
           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-white/80">
-            {MANUFACTURERS.map((m) => (
-              <a key={m} href="#" className="hover:text-white">
-                {m}
-              </a>
+            {brandList.slice(0, 8).map((m) => (
+              <Link key={m.slug} href={`/products?brand=${m.slug}`} className="hover:text-white">
+                {m.label}
+              </Link>
             ))}
           </div>
         </div>

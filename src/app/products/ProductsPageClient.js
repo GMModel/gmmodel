@@ -8,16 +8,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 import ProductCard from "@/components/ProductCard";
-import { BRAND_LIST } from "@/lib/brands";
-import { COUNTRY_GROUPS } from "@/lib/carBrands";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 import { pickLabel } from "@/lib/i18n";
 
-const TAB_KEYS = ["all", "new", "preorder", "bestseller", "sale", "1-12", "1-18", "1-24", "1-32", "1-43"];
 const PAGE_SIZE = 12;
 
 export default function ProductsPageClient() {
-  const { t, locale } = useStore();
+  const { t, locale, brandList, scales, countryGroups, scaleLabel } = useStore();
+  const TAB_KEYS = ["all", "new", "preorder", "bestseller", "sale", ...scales.map((s) => s.slug)];
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -145,7 +143,7 @@ export default function ProductsPageClient() {
                       activeTab === key ? "bg-white text-black" : "bg-white/10 text-white/70 hover:bg-white/20"
                     }`}
                   >
-                    {t.productSection.tabs[key]}
+                    {t.productSection.tabs[key] ?? scaleLabel(key)}
                   </button>
                 ))}
               </div>
@@ -154,7 +152,7 @@ export default function ProductsPageClient() {
                 <button onClick={() => goTo({ brand: null })} className={chipClass(!activeBrand)}>
                   {t.productSection.brandFilterLabel}
                 </button>
-                {BRAND_LIST.map((b) => (
+                {brandList.map((b) => (
                   <button key={b.slug} onClick={() => goTo({ brand: b.slug })} className={chipClass(activeBrand === b.slug)}>
                     {b.label}
                   </button>
@@ -165,7 +163,7 @@ export default function ProductsPageClient() {
                 <button onClick={() => goTo({ country: null })} className={chipClass(!activeCountry)}>
                   {t.productSection.carBrandFilterLabel}
                 </button>
-                {COUNTRY_GROUPS.map((group) => (
+                {countryGroups.map((group) => (
                   <button key={group.slug} onClick={() => goTo({ country: group.slug })} className={chipClass(activeCountry === group.slug)}>
                     {pickLabel(group, locale)}
                   </button>

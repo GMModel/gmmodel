@@ -9,13 +9,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 import ModelThumb from "@/components/ModelThumb";
-import { COUNTRY_GROUPS } from "@/lib/carBrands";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 import { pickLabel, pickProductName, pickProductDescription } from "@/lib/i18n";
 
 export default function ProductDetailClient({ params }) {
   const { slug } = use(params);
-  const { locale, formatPrice, t } = useStore();
+  const { locale, formatPrice, t, countryGroups } = useStore();
   const { addItem } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [product, setProduct] = useState(undefined);
@@ -64,7 +63,7 @@ export default function ProductDetailClient({ params }) {
   const name = pickProductName(product, locale);
   const description = pickProductDescription(product, locale);
   const favorited = isWishlisted(product.id);
-  const countryGroup = COUNTRY_GROUPS.find((g) => g.brands.includes(product.carBrand));
+  const countryGroup = countryGroups.find((g) => g.brands.includes(product.carBrand));
   const bodyStyle = BODY_STYLES.find((s) => s.slug === product.bodyStyle);
   const outOfStock = !product.isPreOrder && product.stockQty <= 0;
 

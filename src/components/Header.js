@@ -7,11 +7,8 @@ import { useStore } from "@/context/StoreContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useTheme } from "@/context/ThemeContext";
-import { BRAND_LIST } from "@/lib/brands";
-import { COUNTRY_GROUPS } from "@/lib/carBrands";
 import { pickLabel } from "@/lib/i18n";
 
-const SCALE_OPTIONS = ["1-12", "1-18", "1-24", "1-32", "1-43"];
 const LOCALES = ["vi", "en", "es"];
 const LOCALE_LABELS = { vi: "Tiếng Việt", en: "English", es: "Español" };
 
@@ -21,7 +18,7 @@ function ActiveDot({ active }) {
 }
 
 export default function Header() {
-  const { t, locale, setLocale } = useStore();
+  const { t, locale, setLocale, settings, brandList, scales, countryGroups, scaleLabel } = useStore();
   const { totalQty, toggle } = useCart();
   const { totalCount: wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
@@ -101,11 +98,11 @@ export default function Header() {
       <div className="border-b border-white/10 px-4 py-2 md:px-8">
         <div className="mx-auto flex max-w-[1336px] items-center gap-4">
           <Link href="/" className="flex items-center md:hidden">
-            <img src={theme === "light" ? "/logo-light.png" : "/logo.png"} alt={t.brand} className="h-9 w-auto" />
+            <img src={theme === "light" ? settings.logoLight || "/logo-light.png" : settings.logoDark || "/logo.png"} alt={t.brand} className="h-9 w-auto" />
           </Link>
           <div className="hidden flex-1 items-center md:flex">
             <Link href="/" className="flex items-center">
-              <img src={theme === "light" ? "/logo-light.png" : "/logo.png"} alt={t.brand} className="h-14 w-auto" />
+              <img src={theme === "light" ? settings.logoLight || "/logo-light.png" : settings.logoDark || "/logo.png"} alt={t.brand} className="h-14 w-auto" />
             </Link>
           </div>
           <form
@@ -291,7 +288,7 @@ export default function Header() {
                 </svg>
               </button>
               <div className="invisible absolute left-0 top-full z-50 grid w-56 grid-cols-3 gap-1 rounded-lg border border-white/10 bg-neutral-950 p-2 opacity-0 shadow-xl transition-opacity group-hover:visible group-hover:opacity-100">
-                {COUNTRY_GROUPS.map((group) => (
+                {countryGroups.map((group) => (
                   <Link
                     key={group.slug}
                     href={`/products?country=${group.slug}`}
@@ -312,13 +309,13 @@ export default function Header() {
                 </svg>
               </button>
               <div className="invisible absolute left-0 top-full z-50 w-32 rounded-lg border border-white/10 bg-neutral-950 py-2 opacity-0 shadow-xl transition-opacity group-hover:visible group-hover:opacity-100">
-                {SCALE_OPTIONS.map((scale) => (
+                {scales.map(({ slug: scale }) => (
                   <Link
                     key={scale}
                     href={`/products?tab=${scale}`}
                     className={dropdownItemClass(activeScaleTab === scale)}
                   >
-                    {t.productSection.tabs[scale]}
+                    {scaleLabel(scale)}
                     <ActiveDot active={activeScaleTab === scale} />
                   </Link>
                 ))}
@@ -333,7 +330,7 @@ export default function Header() {
                 </svg>
               </button>
               <div className="invisible absolute left-0 top-full z-50 grid w-56 grid-cols-3 gap-1 rounded-lg border border-white/10 bg-neutral-950 p-2 opacity-0 shadow-xl transition-opacity group-hover:visible group-hover:opacity-100">
-                {BRAND_LIST.map((b) => (
+                {brandList.map((b) => (
                   <Link
                     key={b.slug}
                     href={`/products?brand=${b.slug}`}
@@ -391,7 +388,7 @@ export default function Header() {
                 </svg>
               </summary>
               <div className="grid grid-cols-2 gap-1 py-1">
-                {COUNTRY_GROUPS.map((group) => (
+                {countryGroups.map((group) => (
                   <Link
                     key={group.slug}
                     href={`/products?country=${group.slug}`}
@@ -412,13 +409,13 @@ export default function Header() {
                 </svg>
               </summary>
               <div className="flex flex-col gap-1 py-1">
-                {SCALE_OPTIONS.map((scale) => (
+                {scales.map(({ slug: scale }) => (
                   <Link
                     key={scale}
                     href={`/products?tab=${scale}`}
                     className={`rounded px-2 py-1.5 text-xs ${dropdownItemClass(activeScaleTab === scale)}`}
                   >
-                    {t.productSection.tabs[scale]}
+                    {scaleLabel(scale)}
                     <ActiveDot active={activeScaleTab === scale} />
                   </Link>
                 ))}
@@ -433,7 +430,7 @@ export default function Header() {
                 </svg>
               </summary>
               <div className="grid grid-cols-2 gap-1 py-1">
-                {BRAND_LIST.map((b) => (
+                {brandList.map((b) => (
                   <Link
                     key={b.slug}
                     href={`/products?brand=${b.slug}`}

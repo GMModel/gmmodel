@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
+import { getGoogleRedirectUri } from "@/lib/googleOAuth";
 
 export async function GET(request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -8,7 +9,7 @@ export async function GET(request) {
   }
 
   const state = crypto.randomBytes(16).toString("hex");
-  const redirectUri = new URL("/api/auth/google/callback", request.url).toString();
+  const redirectUri = getGoogleRedirectUri(request);
 
   const { searchParams } = new URL(request.url);
   const next = searchParams.get("next");

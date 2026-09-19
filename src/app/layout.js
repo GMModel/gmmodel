@@ -5,6 +5,7 @@ import { StoreProvider } from "@/context/StoreContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { getSiteData } from "@/lib/siteContent";
 import CartDrawer from "@/components/CartDrawer";
 
 const geistSans = Geist({
@@ -17,7 +18,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+const baseMetadata = {
+  icons: { icon: "/favicon.png" },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
     default: "GM Model — Mô Hình Xe Kim Loại Diecast Tỉ Lệ 1:18, 1:24, 1:43",
@@ -49,9 +51,29 @@ export const metadata = {
   },
 };
 
+export async function generateMetadata() {
+  const { settings } = await getSiteData();
+  const title = settings.siteTitle;
+  const description = settings.siteDescription;
+  if (!title && !description && !settings.favicon) return baseMetadata;
+  return {
+    ...baseMetadata,
+    icons: { icon: settings.favicon || baseMetadata.icons.icon },
+    title: title ? { ...baseMetadata.title, default: title } : baseMetadata.title,
+    description: description || baseMetadata.description,
+    openGraph: {
+      ...baseMetadata.openGraph,
+      title: title || baseMetadata.openGraph.title,
+      description: description || baseMetadata.openGraph.description,
+    },
+  };
+}
+
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const initialLocale = cookieStore.get("locale")?.value ?? "vi";
+
+  const { overrides, settings, banners, tiles, footer, pages, countries, catalog } = await getSiteData();
 
   return (
     <html
@@ -60,7 +82,14 @@ export default async function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col bg-black">
         <ThemeProvider>
-          <StoreProvider initialLocale={initialLocale}>
+          <StoreProvider initialLocale={initialLocale} overrides={overrides} settings={settings}
+            banners={banners}
+            tiles={tiles}
+            footer={footer}
+            pages={pages}
+            countries={countries}
+            catalog={catalog}
+          >
             <CartProvider>
               <WishlistProvider>
                 {children}

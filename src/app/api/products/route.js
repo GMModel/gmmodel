@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { COUNTRY_GROUPS } from "@/lib/carBrands";
+import { getCountryGroups } from "@/lib/siteContent";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -37,7 +37,7 @@ export async function GET(request) {
     where.carBrand = carBrand;
   }
   if (country) {
-    const group = COUNTRY_GROUPS.find((g) => g.slug === country);
+    const group = (await getCountryGroups()).find((g) => g.slug === country);
     where.carBrand = { in: group?.brands ?? [] };
   }
   if (bodyStyle) {
