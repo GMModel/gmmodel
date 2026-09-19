@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { uploadMedia } from "@/lib/clientUpload";
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 placeholder:text-slate-400";
@@ -45,12 +46,7 @@ export default function BannersTab() {
     try {
       const added = [];
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Tải ảnh thất bại");
-        added.push({ imageUrl: data.url, link: "", alt: "" });
+        added.push({ imageUrl: await uploadMedia(file), link: "", alt: "" });
       }
       setBanners((list) => [...list, ...added]);
     } catch (err) {

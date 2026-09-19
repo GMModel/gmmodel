@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { uploadMedia } from "@/lib/clientUpload";
+import { FilePickButton } from "@/components/admin/fields";
 import { useRouter } from "next/navigation";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 
@@ -40,6 +42,7 @@ export default function ProductForm({ product }) {
     isBestSeller: product?.isBestSeller ?? false,
   });
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,62 +63,27 @@ export default function ProductForm({ product }) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  async function uploadFile(file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Tải ảnh thất bại");
-    return data.url;
-  }
-
-  async function handleUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Runs an upload for one section, showing progress and errors right next to its button.
+  async function runUpload(fn) {
     setUploading(true);
-    setError("");
+    setUploadError("");
     try {
-      const url = await uploadFile(file);
-      update("imageUrl", url);
+      await fn();
     } catch (err) {
-      setError(err.message);
+      setUploadError(err.message || "Tải lên thất bại");
     } finally {
       setUploading(false);
-      e.target.value = "";
     }
   }
 
-  async function handleVideoUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError("");
-    try {
-      const url = await uploadFile(file);
-      update("videoUrl", url);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
-  }
-
-  async function handleGalleryUpload(e) {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    setUploading(true);
-    setError("");
-    try {
-      const urls = await Promise.all(files.map(uploadFile));
+  const handleUpload = (files) => runUpload(async () => update("imageUrl", await uploadMedia(files[0])));
+  const handleVideoUpload = (files) => runUpload(async () => update("videoUrl", await uploadMedia(files[0])));
+  const handleGalleryUpload = (files) =>
+    runUpload(async () => {
+      const urls = [];
+      for (const file of files) urls.push(await uploadMedia(file));
       setForm((f) => ({ ...f, galleryUrls: [...f.galleryUrls, ...urls] }));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
-  }
+    });
 
   function removeGalleryImage(index) {
     setForm((f) => ({ ...f, galleryUrls: f.galleryUrls.filter((_, i) => i !== index) }));
@@ -270,8 +238,11 @@ export default function ProductForm({ product }) {
             )}
           </div>
           <div className="w-full min-w-0 flex-1">
-            <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} className="w-full max-w-full text-sm" />
-            {uploading ? <p className="mt-1 text-xs text-slate-400">Đang tải ảnh lên...</p> : null}
+            <FilePickButton accept="image/*" disabled={uploading} onFiles={handleUpload}>
+              Chọn ảnh từ thư viện
+            </FilePickButton>
+            {uploading ? <p className="mt-2 text-xs text-slate-500">Đang tải lên, vui lòng đợi…</p> : null}
+            {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
             <div className="mt-3">
               <label className={labelClass}>Hoặc dán URL ảnh</label>
               <input value={form.imageUrl} onChange={(e) => update("imageUrl", e.target.value)} className={inputClass} placeholder="https://..." />
@@ -296,8 +267,11 @@ export default function ProductForm({ product }) {
             )}
           </div>
           <div className="w-full min-w-0 flex-1">
-            <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleVideoUpload} disabled={uploading} className="w-full max-w-full text-sm" />
-            {uploading ? <p className="mt-1 text-xs text-slate-400">Đang tải lên...</p> : null}
+            <FilePickButton accept="video/mp4,video/webm,video/quicktime,video/*" disabled={uploading} onFiles={handleVideoUpload}>
+              Chọn video từ thư viện
+            </FilePickButton>
+            {uploading ? <p className="mt-2 text-xs text-slate-500">Đang tải lên, vui lòng đợi…</p> : null}
+            {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
             <p className="mt-1 text-xs text-slate-400">MP4, WEBM hoặc MOV, tối đa 50MB.</p>
             <div className="mt-3">
               <label className={labelClass}>Hoặc dán URL video</label>
@@ -334,7 +308,13 @@ export default function ProductForm({ product }) {
             </div>
           ))}
         </div>
-        <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} className="mt-3 w-full max-w-full text-sm" />
+        <div className="mt-3">
+          <FilePickButton accept="image/*" multiple disabled={uploading} onFiles={handleGalleryUpload}>
+            Thêm ảnh từ thư viện
+          </FilePickButton>
+        </div>
+        {uploading ? <p className="mt-2 text-xs text-slate-500">Đang tải lên, vui lòng đợi…</p> : null}
+        {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
       </div>
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">

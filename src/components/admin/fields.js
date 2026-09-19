@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LOCALE_IDS } from "@/lib/contentUtils";
+import { uploadMedia } from "@/lib/clientUpload";
 
 export const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 placeholder:text-slate-400";
@@ -14,12 +15,35 @@ export const primaryBtnClass =
 const LOCALE_FLAGS = { vi: "VN", en: "US", es: "ES" };
 
 export async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Tải ảnh thất bại");
-  return data.url;
+  return uploadMedia(file);
+}
+
+// Big, phone-friendly button that opens the photo library / file picker.
+export function FilePickButton({ accept, multiple = false, disabled = false, onFiles, children }) {
+  return (
+    <label
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100 ${
+        disabled ? "pointer-events-none opacity-50" : ""
+      }`}
+    >
+      <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4-4 4 4 4-6 4 6M4 5h16v14H4z" />
+      </svg>
+      {children}
+      <input
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        disabled={disabled}
+        className="hidden"
+        onChange={(e) => {
+          const files = [...(e.target.files ?? [])];
+          e.target.value = "";
+          if (files.length > 0) onFiles(files);
+        }}
+      />
+    </label>
+  );
 }
 
 // Image URL field with upload button + preview.
@@ -53,7 +77,7 @@ export function ImageField({ value, onChange, onError, height = "h-20" }) {
       <div className="flex flex-wrap gap-2">
         <label className={`${btnClass} cursor-pointer ${uploading ? "pointer-events-none opacity-50" : ""}`}>
           {uploading ? "Đang tải…" : value ? "Đổi ảnh" : "Tải ảnh lên"}
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFile} className="hidden" />
+          <input type="file" accept="image/*" onChange={handleFile} className="hidden" />
         </label>
         {value && (
           <button type="button" onClick={() => onChange("")} className={`${btnClass} text-red-600`}>
