@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { defaultFooterColumns } from "@/lib/contentUtils";
+import { defaultFooterColumns, defaultFooterTagline } from "@/lib/contentUtils";
 import {
   LocalizedInput,
   Message,
@@ -18,12 +18,19 @@ const blankColumn = { title: { vi: "", en: "", es: "" }, links: [blankLink] };
 
 export default function FooterTab() {
   const [columns, setColumns] = useState(null);
+  const [tagline, setTagline] = useState(defaultFooterTagline());
+  const [settings, setSettings] = useState(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
     loadSite()
-      .then((site) => setColumns(site.footer?.columns ?? defaultFooterColumns()))
+      .then((site) => {
+        setColumns(site.footer?.columns ?? defaultFooterColumns());
+        const saved = site.footer?.tagline;
+        setTagline({ ...defaultFooterTagline(), ...Object.fromEntries(Object.entries(saved ?? {}).filter(([, v]) => v)) });
+        setSettings(site.settings ?? null);
+      })
       .catch(() => setColumns(defaultFooterColumns()));
   }, []);
 
@@ -41,7 +48,7 @@ export default function FooterTab() {
     setSaving(true);
     setMessage(null);
     try {
-      await saveSite({ footer: { columns } });
+      await saveSite({ footer: { columns, tagline }, ...(settings ? { settings } : {}) });
       setMessage({ ok: true, text: "Đã lưu chân trang." });
     } catch (err) {
       setMessage({ ok: false, text: err.message });
@@ -55,6 +62,7 @@ export default function FooterTab() {
     try {
       await saveSite({ footer: null });
       setColumns(defaultFooterColumns());
+      setTagline(defaultFooterTagline());
       setMessage({ ok: true, text: "Đã khôi phục mặc định." });
     } catch (err) {
       setMessage({ ok: false, text: err.message });
@@ -67,7 +75,7 @@ export default function FooterTab() {
         <div>
           <h2 className="text-xl font-bold">Chân trang</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Các cột menu ở chân trang (tối đa 6 cột, 12 link mỗi cột). Số điện thoại, email, địa chỉ, mạng xã hội và phương thức thanh toán chỉnh ở mục Cài đặt.
+            Chỉnh mọi thứ ở chân trang: đoạn giới thiệu, số điện thoại, email, địa chỉ và các cột menu (tối đa 6 cột, 12 link mỗi cột). Mạng xã hội và phương thức thanh toán chỉnh ở tab Liên hệ & Cài đặt chung.
           </p>
         </div>
         <div className="flex gap-2">
@@ -85,6 +93,27 @@ export default function FooterTab() {
         <p className="mt-8 text-sm text-slate-500">Đang tải…</p>
       ) : (
         <div className="mt-6 space-y-6">
+          <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-bold">Khối bên trái (tên, giới thiệu, liên hệ)</h3>
+            <LocalizedInput label="Đoạn giới thiệu dưới tên shop (VN / US / ES)" rows={2} value={tagline} onChange={setTagline} />
+            {settings && (
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-slate-600">Số điện thoại (chữ hiển thị tuỳ ý, cũng là chữ ở nút gọi điện)</span>
+                  <input value={settings.phone} onChange={(e) => setSettings({ ...settings, phone: e.target.value })} placeholder="+84 347 347 823" className={inputClass} />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-slate-600">Email</span>
+                  <input value={settings.email} onChange={(e) => setSettings({ ...settings, email: e.target.value })} placeholder="hello@example.com" className={inputClass} />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-slate-600">Địa chỉ</span>
+                  <input value={settings.address} onChange={(e) => setSettings({ ...settings, address: e.target.value })} placeholder="Số nhà, đường, quận, thành phố" className={inputClass} />
+                </label>
+              </div>
+            )}
+            <p className="text-xs text-slate-500">Email và địa chỉ để trống thì không hiện ở chân trang.</p>
+          </section>
           {columns.map((col, ci) => (
             <section key={ci} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-start justify-between gap-3">

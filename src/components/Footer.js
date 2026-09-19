@@ -51,7 +51,7 @@ export default function Footer() {
               )
             )}
           </div>
-          <p className="mt-3 text-xs text-white/50">{t.footer.tagline}</p>
+          <p className="mt-3 text-xs text-white/50">{pickLocalized(footer?.tagline, locale) || t.footer.tagline}</p>
           <ul className="mt-3 space-y-1 text-xs text-white/60">
             {settings.phone && (
               <li>

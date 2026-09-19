@@ -234,7 +234,12 @@ export function sanitizeFooter(input) {
     }
     columns.push({ title: cleanLoc(col?.title), links });
   }
-  return { columns };
+  const tagline = loc((l) => clip(typeof input?.tagline === "string" ? input.tagline : input?.tagline?.[l], 400));
+  return { columns, tagline };
+}
+
+export function defaultFooterTagline() {
+  return loc((l) => dictionary[l].footer.tagline);
 }
 
 export function sanitizePages(input) {
