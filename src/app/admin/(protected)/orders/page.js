@@ -68,12 +68,12 @@ export default function AdminOrdersPage() {
       <p className="mt-1 text-sm text-slate-500">Quản lý và cập nhật trạng thái đơn hàng.</p>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+        <form onSubmit={handleSearchSubmit} className="flex w-full items-center gap-2 sm:w-auto">
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Tìm theo mã đơn, tên, SĐT..."
-            className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900"
+            className="w-full min-w-0 flex-1 rounded-lg border border-slate-300 sm:w-64 sm:flex-none px-3 py-2 text-sm outline-none focus:border-slate-900"
           />
           <button type="submit" className="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:border-slate-900">
             Tìm

@@ -156,7 +156,7 @@ export default function ProductForm({ product }) {
         <p className="mt-1 text-xs text-slate-400">
           Chỉ cần nhập Tiếng Việt — bản Tiếng Anh và Tiếng Tây Ban Nha sẽ được AI tự động dịch khi lưu.
         </p>
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Tên sản phẩm (Tiếng Việt) *</label>
             <input required value={form.nameVi} onChange={(e) => update("nameVi", e.target.value)} className={inputClass} />
@@ -180,7 +180,7 @@ export default function ProductForm({ product }) {
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900">Phân loại</h2>
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Loại sản phẩm</label>
             <select value={form.category} onChange={(e) => update("category", e.target.value)} className={inputClass}>
@@ -231,7 +231,7 @@ export default function ProductForm({ product }) {
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900">Giá &amp; Tồn kho</h2>
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Giá bán (USD) *</label>
             <input required type="number" step="0.01" min="0" value={form.priceUsd} onChange={(e) => update("priceUsd", e.target.value)} className={inputClass} />

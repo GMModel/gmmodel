@@ -41,12 +41,12 @@ export default function AdminCustomersPage() {
       <h1 className="text-2xl font-bold text-slate-900">Khách hàng</h1>
       <p className="mt-1 text-sm text-slate-500">Danh sách tài khoản đã đăng ký và lịch sử mua hàng.</p>
 
-      <form onSubmit={handleSearchSubmit} className="mt-6 flex items-center gap-2">
+      <form onSubmit={handleSearchSubmit} className="mt-6 flex w-full items-center gap-2 sm:w-auto">
         <input
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Tìm theo tên hoặc email..."
-          className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900"
+          className="w-full min-w-0 flex-1 rounded-lg border border-slate-300 sm:w-64 sm:flex-none px-3 py-2 text-sm outline-none focus:border-slate-900"
         />
         <button type="submit" className="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:border-slate-900">
           Tìm

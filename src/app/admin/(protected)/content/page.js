@@ -29,12 +29,12 @@ export default function AdminContentPage() {
       <h1 className="text-2xl font-bold">Nội dung website</h1>
       <p className="mt-1 text-sm text-slate-500">Mọi thứ hiển thị trên web đều chỉnh ở đây — {active.hint.toLowerCase()}.</p>
 
-      <div className="mt-5 flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+      <div className="-mx-4 mt-5 flex gap-2 overflow-x-auto border-b border-slate-200 px-4 pb-4 md:mx-0 md:flex-wrap md:px-0">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+            className={`shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold ${
               tab === t.id ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-200"
             }`}
           >
