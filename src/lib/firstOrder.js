@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 // First-order discount: a signed-in customer with no earlier *real* order gets
-// `firstOrderPercent`% off (setting in Admin → Nội dung website → Cài đặt chung; 0 = off).
+// `firstOrderPercent`% off (setting in Admin → Cài đặt → nhóm Ưu đãi; 0 = off).
 // It is applied server-side when the order is created, so the browser cannot fake it.
 export const FIRST_ORDER_CODE = "FIRST_ORDER";
 const DEFAULT_PERCENT = 10;

@@ -75,7 +75,7 @@ export default function FooterTab() {
         <div>
           <h2 className="text-xl font-bold">Chân trang</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Chỉnh mọi thứ ở chân trang: đoạn giới thiệu, số điện thoại, email, địa chỉ và các cột menu (tối đa 6 cột, 12 link mỗi cột). Mạng xã hội và phương thức thanh toán chỉnh ở tab Liên hệ & Cài đặt chung.
+            Chỉnh mọi thứ ở chân trang: đoạn giới thiệu, số điện thoại, email, địa chỉ và các cột menu (tối đa 6 cột, 12 link mỗi cột). Logo, mạng xã hội và phương thức thanh toán chỉnh ở mục Cài đặt (menu bên trái).
           </p>
         </div>
         <div className="flex gap-2">

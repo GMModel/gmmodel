@@ -36,7 +36,7 @@ export default function ProductCard({ product, highlight = false, meta = null })
             src={product.imageUrl}
             alt={name}
             scaleLabel={product.scale?.label}
-            className="h-40 w-full"
+            className="aspect-square w-full"
           />
         </Link>
         {product.badge ? (

@@ -50,7 +50,7 @@ export default function CartDrawer() {
                     src={item.imageUrl}
                     alt={pickProductName(item, locale)}
                     scaleLabel={item.scaleLabel}
-                    className="h-16 w-20 flex-shrink-0 rounded"
+                    className="h-16 w-16 flex-shrink-0 rounded"
                   />
                   <div className="flex flex-1 flex-col">
                     <p className="line-clamp-2 text-xs font-medium">

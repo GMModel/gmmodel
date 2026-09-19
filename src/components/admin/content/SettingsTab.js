@@ -12,7 +12,7 @@ function Wrap({ f, children }) {
   return f.image ? <div className="block">{children}</div> : <label className="block">{children}</label>;
 }
 
-const GROUP_ORDER = ["Liên hệ", "Nút liên hệ nổi", "Mạng xã hội", "Logo & thanh toán", "Trang chủ", "Ưu đãi", "SEO"];
+const GROUP_ORDER = ["Logo & Favicon", "Liên hệ", "Nút liên hệ nổi", "Mạng xã hội", "Thanh toán", "SEO", "Trang chủ", "Ưu đãi"];
 const GROUPS = [...new Set(SETTING_FIELDS.map((f) => f.group))].sort(
   (a, b) => (GROUP_ORDER.indexOf(a) + 100) % 100 - (GROUP_ORDER.indexOf(b) + 100) % 100,
 );
@@ -58,7 +58,7 @@ export default function SettingsTab() {
         <div>
           <h2 className="text-xl font-bold">Cài đặt</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Số điện thoại (chữ tuỳ ý), các nút Zalo/WhatsApp/gọi điện nổi (đổi link, bật/tắt), email, địa chỉ, mạng xã hội, logo và SEO của website. Để trống logo = dùng logo mặc định. Mạng xã hội để trống sẽ không hiển thị ở chân trang.
+            Logo, favicon, số điện thoại (chữ tuỳ ý), các nút Zalo/WhatsApp/gọi điện nổi (đổi link, bật/tắt), email, địa chỉ, mạng xã hội, thanh toán và SEO. Để trống logo = dùng logo mặc định. Mạng xã hội để trống sẽ không hiển thị ở chân trang.
           </p>
         </div>
         <button

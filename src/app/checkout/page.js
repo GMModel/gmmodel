@@ -333,7 +333,7 @@ export default function CheckoutPage() {
                       src={item.imageUrl}
                       alt={pickProductName(item, locale)}
                       scaleLabel={item.scaleLabel}
-                      className="h-14 w-16 flex-shrink-0 rounded"
+                      className="h-14 w-14 flex-shrink-0 rounded"
                     />
                     <div className="flex-1">
                       <p className="line-clamp-1 text-sm font-medium">

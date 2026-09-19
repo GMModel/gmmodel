@@ -8,7 +8,6 @@ import TilesTab from "@/components/admin/content/TilesTab";
 import FooterTab from "@/components/admin/content/FooterTab";
 import CountriesTab from "@/components/admin/content/CountriesTab";
 import PagesTab from "@/components/admin/content/PagesTab";
-import SettingsTab from "@/components/admin/content/SettingsTab";
 
 const TABS = [
   { id: "text", label: "Văn bản", hint: "Mọi chữ trên web, theo từng ngôn ngữ", Component: TextTab },
@@ -18,7 +17,6 @@ const TABS = [
   { id: "footer", label: "Chân trang", hint: "Cột menu ở chân trang", Component: FooterTab },
   { id: "countries", label: "Xuất xứ xe", hint: "Nhóm quốc gia cho bộ lọc hãng xe", Component: CountriesTab },
   { id: "pages", label: "Chính sách & Affiliate", hint: "Trang Bảo mật, Điều khoản và Affiliate", Component: PagesTab },
-  { id: "settings", label: "Liên hệ & Cài đặt chung", hint: "Số điện thoại, Zalo, WhatsApp, email, mạng xã hội, logo, SEO", Component: SettingsTab },
 ];
 
 export default function AdminContentPage() {
