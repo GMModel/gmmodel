@@ -18,7 +18,7 @@ function ActiveDot({ active }) {
 }
 
 export default function Header() {
-  const { t, locale, setLocale, settings, brandList, scales, countryGroups, scaleLabel } = useStore();
+  const { t, locale, setLocale, settings, scales, countryGroups, scaleLabel } = useStore();
   const { totalQty, toggle } = useCart();
   const { totalCount: wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
@@ -38,6 +38,7 @@ export default function Header() {
   const activeBrand = isProductsPage ? searchParams.get("brand") : null;
   const isAllProductsActive = isProductsPage && !activeBodyStyle && !activeCountry && !activeScaleTab && !activeBrand;
   const isAccessoriesActive = pathname === "/accessories";
+  const isAffiliateActive = pathname === "/affiliate";
 
   function navItemClass(active) {
     return `inline-flex items-center gap-1.5 hover:text-red-500 ${active ? "font-semibold text-red-500" : ""}`;
@@ -86,14 +87,14 @@ export default function Header() {
 
   return (
     <div className="sticky top-0 z-50 bg-black text-white">
-      {!user ? (
-        <div className="flex items-center justify-center gap-3 border-b border-white/10 bg-neutral-950 px-4 py-2 text-center text-xs">
-          <span>{t.banner}</span>
+      <div className="flex items-center justify-center gap-3 border-b border-white/10 bg-neutral-950 px-4 py-2 text-center text-xs">
+        <span>{t.banner}</span>
+        {!user ? (
           <Link href="/register" className="rounded bg-red-600 px-3 py-1 font-semibold text-white hover:bg-red-500">
             {t.createAccount}
           </Link>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       <div className="border-b border-white/10 px-4 py-2 md:px-8">
         <div className="mx-auto flex max-w-[1336px] items-center gap-4">
@@ -321,27 +322,10 @@ export default function Header() {
                 ))}
               </div>
             </div>
-            <div className="group relative">
-              <button className={`flex items-center gap-1 ${navItemClass(Boolean(activeBrand))}`}>
-                {t.nav.manufacturers}
-                <ActiveDot active={Boolean(activeBrand)} />
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div className="invisible absolute left-0 top-full z-50 grid w-56 grid-cols-3 gap-1 rounded-lg border border-white/10 bg-neutral-950 p-2 opacity-0 shadow-xl transition-opacity group-hover:visible group-hover:opacity-100">
-                {brandList.map((b) => (
-                  <Link
-                    key={b.slug}
-                    href={`/products?brand=${b.slug}`}
-                    className={`rounded justify-center text-xs ${dropdownItemClass(activeBrand === b.slug)}`}
-                  >
-                    {b.label}
-                    <ActiveDot active={activeBrand === b.slug} />
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <Link className={navItemClass(isAffiliateActive)} href="/affiliate">
+              {t.nav.affiliate}
+              <ActiveDot active={isAffiliateActive} />
+            </Link>
           </nav>
           <div className="ml-auto flex items-center gap-4">
             <button aria-label="toggle dark mode" onClick={toggleTheme} className="hover:text-red-500">
@@ -422,26 +406,10 @@ export default function Header() {
               </div>
             </details>
 
-            <details className="group/d">
-              <summary className="flex cursor-pointer list-none items-center justify-between py-2 hover:text-red-500">
-                {t.nav.manufacturers}
-                <svg className="h-3 w-3 transition-transform group-open/d:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="grid grid-cols-2 gap-1 py-1">
-                {brandList.map((b) => (
-                  <Link
-                    key={b.slug}
-                    href={`/products?brand=${b.slug}`}
-                    className={`rounded px-2 py-1.5 text-xs ${dropdownItemClass(activeBrand === b.slug)}`}
-                  >
-                    {b.label}
-                    <ActiveDot active={activeBrand === b.slug} />
-                  </Link>
-                ))}
-              </div>
-            </details>
+            <Link className={`py-2 ${navItemClass(isAffiliateActive)}`} href="/affiliate">
+              {t.nav.affiliate}
+              <ActiveDot active={isAffiliateActive} />
+            </Link>
 
             <div className="mt-2 flex items-center gap-2 border-t border-white/10 pt-3 md:hidden">
               {LOCALES.map((l) => (

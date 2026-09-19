@@ -7,6 +7,7 @@ export const dictionary = {
       usedModels: "Body style",
       brands: "Brands",
       manufacturers: "Manufacturers",
+      affiliate: "Affiliate",
       scales: "Scales",
       sale: "Sale",
       preorders: "All products",
@@ -48,6 +49,8 @@ export const dictionary = {
       shipping: "Shipping",
       shippingFree: "Free",
       discount: "Discount",
+      firstOrder: "First-order discount ({percent}%)",
+      firstOrderHint: "Create an account or sign in to get {percent}% off your first order.",
       total: "Total",
       coupon: {
         label: "Discount code",
@@ -280,6 +283,9 @@ export const dictionary = {
       viewAllFaqs: "View all FAQs",
       contact: "Contact Us",
     },
+    affiliatePage: {
+      cta: "Contact us to join",
+    },
     contactPage: {
       title: "Contact Us",
       subtitle: "Questions about an order, a model, or anything else — send us a message and we'll get back to you.",
@@ -324,6 +330,7 @@ export const dictionary = {
       usedModels: "Estilo de carrocería",
       brands: "Marcas",
       manufacturers: "Fabricantes",
+      affiliate: "Afiliados",
       scales: "Escalas",
       sale: "Ofertas",
       preorders: "Todos los productos",
@@ -365,6 +372,8 @@ export const dictionary = {
       shipping: "Envío",
       shippingFree: "Gratis",
       discount: "Descuento",
+      firstOrder: "Descuento de primer pedido ({percent}%)",
+      firstOrderHint: "Crea una cuenta o inicia sesión para obtener {percent}% de descuento en tu primer pedido.",
       total: "Total",
       coupon: {
         label: "Código de descuento",
@@ -597,6 +606,9 @@ export const dictionary = {
       viewAllFaqs: "Ver todas las preguntas",
       contact: "Contáctanos",
     },
+    affiliatePage: {
+      cta: "Contáctanos para participar",
+    },
     contactPage: {
       title: "Contáctanos",
       subtitle: "Preguntas sobre un pedido, un modelo o cualquier otra cosa — envíanos un mensaje y te responderemos.",
@@ -641,6 +653,7 @@ export const dictionary = {
       usedModels: "Kiểu dáng xe",
       brands: "Thương hiệu",
       manufacturers: "Nhà sản xuất",
+      affiliate: "Affiliate",
       scales: "Tỉ lệ",
       sale: "Giảm giá",
       preorders: "Tất cả sản phẩm",
@@ -682,6 +695,8 @@ export const dictionary = {
       shipping: "Phí vận chuyển",
       shippingFree: "Miễn phí",
       discount: "Giảm giá",
+      firstOrder: "Ưu đãi đơn đầu tiên ({percent}%)",
+      firstOrderHint: "Tạo tài khoản hoặc đăng nhập để được giảm {percent}% cho đơn hàng đầu tiên.",
       total: "Tổng cộng",
       coupon: {
         label: "Mã giảm giá",
@@ -913,6 +928,9 @@ export const dictionary = {
       stillHaveQuestions: "Vẫn còn thắc mắc?",
       viewAllFaqs: "Xem tất cả câu hỏi",
       contact: "Liên hệ",
+    },
+    affiliatePage: {
+      cta: "Liên hệ để tham gia",
     },
     contactPage: {
       title: "Liên hệ",

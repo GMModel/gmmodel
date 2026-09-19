@@ -34,6 +34,7 @@ export function applyOverrides(base, overrides) {
 
 // Site-wide settings editable in admin (stored in SiteContent under id "settings").
 export const SETTING_FIELDS = [
+  { key: "firstOrderPercent", label: "Giảm giá cho đơn hàng đầu tiên của khách có tài khoản (%) — nhập 0 để tắt. Nếu đổi số này, nhớ sửa chữ ở dòng thông báo đầu trang (tab Văn bản → banner)", placeholder: "10", group: "Ưu đãi", number: true },
   { key: "favicon", label: "Favicon (biểu tượng tab trình duyệt, nên là ảnh vuông PNG)", group: "Logo & thanh toán", image: true, url: true },
   { key: "heroLink1", label: "Link nút 1 của banner trang chủ", placeholder: "/products", group: "Trang chủ", url: true },
   { key: "heroLink2", label: "Link nút 2 của banner trang chủ", placeholder: "/sale", group: "Trang chủ", url: true },
@@ -41,8 +42,13 @@ export const SETTING_FIELDS = [
   { key: "logoLight", label: "Logo (nền sáng — chế độ Light)", group: "Logo & thanh toán", image: true, url: true },
   { key: "payments", label: "Phương thức thanh toán hiển thị ở chân trang (cách nhau bằng dấu phẩy)", placeholder: "Visa, Mastercard, PayPal", group: "Logo & thanh toán" },
   { key: "phone", label: "Số điện thoại", placeholder: "+84 347 347 823", group: "Liên hệ" },
-  { key: "zalo", label: "Số Zalo (để trống = dùng số điện thoại)", placeholder: "+84 347 347 823", group: "Liên hệ" },
-  { key: "whatsapp", label: "Số WhatsApp (để trống = dùng số điện thoại)", placeholder: "+84 347 347 823", group: "Liên hệ" },
+  { key: "zaloShow", label: "Hiện nút Zalo", group: "Nút liên hệ nổi", options: [{ value: "on", label: "Bật" }, { value: "off", label: "Tắt" }] },
+  { key: "zaloLink", label: "Link Zalo (điền thì dùng link này, thay cho số bên dưới. Ví dụ https://zalo.me/0347347823 hoặc link nhóm/OA)", placeholder: "https://zalo.me/...", group: "Nút liên hệ nổi", url: true },
+  { key: "zalo", label: "Số Zalo (để trống = dùng số điện thoại ở nhóm Liên hệ)", placeholder: "+84 347 347 823", group: "Nút liên hệ nổi" },
+  { key: "whatsappShow", label: "Hiện nút WhatsApp", group: "Nút liên hệ nổi", options: [{ value: "on", label: "Bật" }, { value: "off", label: "Tắt" }] },
+  { key: "whatsappLink", label: "Link WhatsApp (điền thì dùng link này, thay cho số bên dưới. Ví dụ https://wa.me/84347347823)", placeholder: "https://wa.me/...", group: "Nút liên hệ nổi", url: true },
+  { key: "whatsapp", label: "Số WhatsApp (để trống = dùng số điện thoại ở nhóm Liên hệ)", placeholder: "+84 347 347 823", group: "Nút liên hệ nổi" },
+  { key: "phoneShow", label: "Hiện nút gọi điện (dùng số điện thoại ở nhóm Liên hệ, chữ hiển thị tuỳ ý)", group: "Nút liên hệ nổi", options: [{ value: "on", label: "Bật" }, { value: "off", label: "Tắt" }] },
   { key: "email", label: "Email", placeholder: "hello@example.com", group: "Liên hệ" },
   { key: "address", label: "Địa chỉ", placeholder: "Số nhà, đường, quận, thành phố", group: "Liên hệ" },
   { key: "facebook", label: "Facebook (link)", placeholder: "https://facebook.com/...", group: "Mạng xã hội", url: true },
@@ -54,6 +60,7 @@ export const SETTING_FIELDS = [
 ];
 
 export const DEFAULT_SETTINGS = {
+  firstOrderPercent: "10",
   favicon: "",
   heroLink1: "/products",
   heroLink2: "/sale",
@@ -63,6 +70,11 @@ export const DEFAULT_SETTINGS = {
   phone: "+84 347 347 823",
   zalo: "",
   whatsapp: "",
+  zaloLink: "",
+  whatsappLink: "",
+  zaloShow: "on",
+  whatsappShow: "on",
+  phoneShow: "on",
   email: "",
   address: "",
   facebook: "",
@@ -83,6 +95,12 @@ export function withSettingDefaults(saved) {
 
 export function phoneDigits(value) {
   return String(value ?? "").replace(/\D/g, "");
+}
+
+// Digits with country code for zalo.me / wa.me links: a local Vietnamese number (0347…) becomes 84347….
+export function intlDigits(value) {
+  const d = phoneDigits(value);
+  return d.startsWith("0") ? `84${d.slice(1)}` : d;
 }
 
 export function isSafeUrl(value) {
@@ -152,14 +170,11 @@ export function defaultFooterColumns() {
       ),
     },
     {
-      title: loc((l) => d(l).footer.manufacturers),
+      title: loc((l) => d(l).nav.affiliate),
       links: [
-        ["Norev", "norev"],
-        ["Minichamps", "minichamps"],
-        ["GT Spirit", "gt-spirit"],
-        ["IXO", "ixo"],
-        ["MCG", "mcg"],
-      ].map(([n, slug]) => link(n, `/products?brand=${slug}`)),
+        link((l) => d(l).nav.affiliate, "/affiliate"),
+        link((l) => d(l).affiliatePage.cta, "/contact"),
+      ],
     },
     {
       title: loc((l) => d(l).footer.help),
@@ -224,7 +239,7 @@ export function sanitizeFooter(input) {
 
 export function sanitizePages(input) {
   const out = {};
-  for (const page of ["privacy", "terms"]) {
+  for (const page of ["privacy", "terms", "affiliate"]) {
     for (const l of LOCALE_IDS) {
       const doc = input?.[page]?.[l];
       if (!doc) continue;

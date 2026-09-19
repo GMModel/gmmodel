@@ -17,8 +17,8 @@ const TABS = [
   { id: "lists", label: "FAQ & Cam kết", hint: "Câu hỏi thường gặp, khối cam kết", Component: ListsTab },
   { id: "footer", label: "Chân trang", hint: "Cột menu ở chân trang", Component: FooterTab },
   { id: "countries", label: "Xuất xứ xe", hint: "Nhóm quốc gia cho bộ lọc hãng xe", Component: CountriesTab },
-  { id: "pages", label: "Chính sách", hint: "Trang Bảo mật và Điều khoản", Component: PagesTab },
-  { id: "settings", label: "Cài đặt chung", hint: "Logo, liên hệ, mạng xã hội, SEO", Component: SettingsTab },
+  { id: "pages", label: "Chính sách & Affiliate", hint: "Trang Bảo mật, Điều khoản và Affiliate", Component: PagesTab },
+  { id: "settings", label: "Liên hệ & Cài đặt chung", hint: "Số điện thoại, Zalo, WhatsApp, email, mạng xã hội, logo, SEO", Component: SettingsTab },
 ];
 
 export default function AdminContentPage() {

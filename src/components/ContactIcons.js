@@ -1,18 +1,19 @@
 "use client";
 
 import { useStore } from "@/context/StoreContext";
-import { phoneDigits } from "@/lib/contentUtils";
+import { phoneDigits, intlDigits } from "@/lib/contentUtils";
 
 function buildLinks(t, settings) {
   const PHONE_DISPLAY = settings.phone;
-  const PHONE_INTL = phoneDigits(settings.phone);
-  const ZALO_INTL = phoneDigits(settings.zalo) || PHONE_INTL;
-  const WA_INTL = phoneDigits(settings.whatsapp) || PHONE_INTL;
+  const PHONE_TEL = (settings.phone.trim().startsWith("+") ? "+" : "") + phoneDigits(settings.phone);
+  const ZALO_INTL = intlDigits(settings.zalo) || intlDigits(settings.phone);
+  const WA_INTL = intlDigits(settings.whatsapp) || intlDigits(settings.phone);
   return [
     {
       label: "Zalo",
       tooltip: t.contactIcons.zalo,
-      href: `https://zalo.me/${ZALO_INTL}`,
+      show: settings.zaloShow !== "off" && Boolean(settings.zaloLink || ZALO_INTL),
+      href: settings.zaloLink || `https://zalo.me/${ZALO_INTL}`,
       bg: "bg-[#0068ff]",
       icon: (
         <svg viewBox="0 0 48 48" className="h-4 w-4" fill="none">
@@ -25,7 +26,8 @@ function buildLinks(t, settings) {
     {
       label: "WhatsApp",
       tooltip: t.contactIcons.whatsapp,
-      href: `https://wa.me/${WA_INTL}`,
+      show: settings.whatsappShow !== "off" && Boolean(settings.whatsappLink || WA_INTL),
+      href: settings.whatsappLink || `https://wa.me/${WA_INTL}`,
       bg: "bg-[#25D366]",
       icon: (
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="white">
@@ -37,7 +39,8 @@ function buildLinks(t, settings) {
     {
       label: "Điện thoại",
       tooltip: PHONE_DISPLAY,
-      href: `tel:+${PHONE_INTL}`,
+      show: settings.phoneShow !== "off" && phoneDigits(settings.phone).length > 0,
+      href: `tel:${PHONE_TEL}`,
       bg: "bg-[#2196F3]",
       icon: (
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="white">
@@ -50,7 +53,8 @@ function buildLinks(t, settings) {
 
 export default function ContactIcons() {
   const { t, settings } = useStore();
-  const LINKS = buildLinks(t, settings);
+  const LINKS = buildLinks(t, settings).filter((l) => l.show);
+  if (LINKS.length === 0) return null;
 
   return (
     <div className="flex flex-row gap-1.5 rounded-full bg-white p-1.5 shadow-xl sm:flex-col">

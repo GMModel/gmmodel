@@ -55,7 +55,7 @@ export default function Footer() {
           <ul className="mt-3 space-y-1 text-xs text-white/60">
             {settings.phone && (
               <li>
-                <a href={`tel:+${phoneDigits(settings.phone)}`} className="hover:text-white">
+                <a href={`tel:${settings.phone.trim().startsWith("+") ? "+" : ""}${phoneDigits(settings.phone)}`} className="hover:text-white">
                   {settings.phone}
                 </a>
               </li>

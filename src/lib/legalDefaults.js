@@ -346,3 +346,84 @@ export const TERMS_DEFAULTS = {
     ],
   },
 };
+
+export const AFFILIATE_DEFAULTS = {
+  "vi": {
+    "title": "Chương Trình Affiliate",
+    "updated": "Cùng GM Model giới thiệu mô hình xe kim loại đến cộng đồng của bạn.",
+    "sections": [
+      {
+        "h": "1. Affiliate là gì?",
+        "p": [
+          "Affiliate là chương trình hợp tác cho phép bạn giới thiệu sản phẩm của GM Model đến bạn bè, người theo dõi hoặc khách hàng của bạn. Khi có đơn hàng phát sinh từ sự giới thiệu của bạn, bạn sẽ nhận được hoa hồng."
+        ]
+      },
+      {
+        "h": "2. Cách tham gia",
+        "p": [
+          "Bước 1: Liên hệ GM Model và cho chúng tôi biết kênh bạn dùng để giới thiệu (Facebook, TikTok, YouTube, website...).",
+          "Bước 2: Chúng tôi phản hồi và hướng dẫn chi tiết cách hợp tác.",
+          "Bước 3: Chia sẻ sản phẩm đến cộng đồng của bạn."
+        ]
+      },
+      {
+        "h": "3. Hoa hồng và thanh toán",
+        "p": [
+          "Mức hoa hồng, thời gian đối soát và hình thức thanh toán sẽ được thông báo cụ thể khi bạn tham gia. Vui lòng liên hệ để biết thêm chi tiết."
+        ]
+      }
+    ]
+  },
+  "en": {
+    "title": "Affiliate Program",
+    "updated": "Partner with GM Model and share collectible diecast models with your community.",
+    "sections": [
+      {
+        "h": "1. What is the affiliate program?",
+        "p": [
+          "Our affiliate program lets you recommend GM Model products to your friends, followers or customers. When an order comes from your recommendation, you earn a commission."
+        ]
+      },
+      {
+        "h": "2. How to join",
+        "p": [
+          "Step 1: Contact GM Model and tell us which channel you use to recommend products (Facebook, TikTok, YouTube, a website...).",
+          "Step 2: We will get back to you with details on how the partnership works.",
+          "Step 3: Share our products with your community."
+        ]
+      },
+      {
+        "h": "3. Commission and payment",
+        "p": [
+          "Commission rates, reconciliation periods and payment methods are shared in detail when you join. Please contact us to learn more."
+        ]
+      }
+    ]
+  },
+  "es": {
+    "title": "Programa de Afiliados",
+    "updated": "Colabora con GM Model y comparte modelos diecast de colección con tu comunidad.",
+    "sections": [
+      {
+        "h": "1. ¿Qué es el programa de afiliados?",
+        "p": [
+          "Nuestro programa de afiliados te permite recomendar los productos de GM Model a tus amigos, seguidores o clientes. Cuando un pedido proviene de tu recomendación, ganas una comisión."
+        ]
+      },
+      {
+        "h": "2. Cómo participar",
+        "p": [
+          "Paso 1: Contacta con GM Model e indícanos el canal que usas para recomendar productos (Facebook, TikTok, YouTube, un sitio web...).",
+          "Paso 2: Te responderemos con los detalles de cómo funciona la colaboración.",
+          "Paso 3: Comparte nuestros productos con tu comunidad."
+        ]
+      },
+      {
+        "h": "3. Comisión y pago",
+        "p": [
+          "Las tasas de comisión, los plazos de conciliación y los métodos de pago se comunican en detalle al unirte. Contáctanos para más información."
+        ]
+      }
+    ]
+  }
+};

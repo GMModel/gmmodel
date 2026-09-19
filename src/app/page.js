@@ -7,7 +7,6 @@ import PreOrderSection from "@/components/PreOrderSection";
 import ProductSection from "@/components/ProductSection";
 import TrustBadges from "@/components/TrustBadges";
 import FaqSection from "@/components/FaqSection";
-import BrandsGuideSection from "@/components/BrandsGuideSection";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 
@@ -37,7 +36,6 @@ export default async function Home() {
         <ProductSection initialProducts={newArrivals} />
         <TrustBadges />
         <FaqSection />
-        <BrandsGuideSection />
       </main>
       <Footer />
       <FloatingWidgets />

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PRIVACY_DEFAULTS, TERMS_DEFAULTS } from "@/lib/legalDefaults";
+import { PRIVACY_DEFAULTS, TERMS_DEFAULTS, AFFILIATE_DEFAULTS } from "@/lib/legalDefaults";
 import { Message, btnClass, inputClass, loadSite, moveItem, primaryBtnClass, saveSite } from "@/components/admin/fields";
 
 const PAGES = [
   { id: "privacy", label: "Chính sách bảo mật", defaults: PRIVACY_DEFAULTS },
   { id: "terms", label: "Điều khoản dịch vụ", defaults: TERMS_DEFAULTS },
+  { id: "affiliate", label: "Affiliate", defaults: AFFILIATE_DEFAULTS },
 ];
 const LOCALES = [
   { id: "vi", label: "🇻🇳 Tiếng Việt" },
@@ -63,7 +64,7 @@ function DocEditor({ initial, isCustom, saving, message, onSave, onReset }) {
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
           </label>
           <label className="block">
-            <span className="mb-1 block text-xs font-medium text-slate-600">Dòng cập nhật</span>
+            <span className="mb-1 block text-xs font-medium text-slate-600">Dòng phụ dưới tiêu đề (ngày cập nhật hoặc giới thiệu ngắn)</span>
             <input value={form.updated} onChange={(e) => setForm({ ...form, updated: e.target.value })} className={inputClass} />
           </label>
         </section>
@@ -148,7 +149,7 @@ export default function PagesTab() {
     <div>
       <h2 className="text-xl font-bold">Trang chính sách</h2>
       <p className="mt-1 text-sm text-slate-500">
-        Sửa nội dung trang Bảo mật và Điều khoản cho từng ngôn ngữ. Mỗi đoạn văn cách nhau bằng một dòng trống.
+        Sửa nội dung trang Bảo mật, Điều khoản và Affiliate cho từng ngôn ngữ. Mỗi đoạn văn cách nhau bằng một dòng trống.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">

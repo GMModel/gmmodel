@@ -38,6 +38,14 @@ export async function PUT(request) {
     const clean = {};
     for (const f of SETTING_FIELDS) {
       const value = String(settings[f.key] ?? "").trim().slice(0, 500);
+      if (f.number) {
+        const n = Number(value);
+        if (value === "" || !Number.isFinite(n) || n < 0 || n > 90) {
+          return NextResponse.json({ error: "Phần trăm giảm giá phải là số từ 0 đến 90" }, { status: 400 });
+        }
+        clean[f.key] = String(Math.round(n));
+        continue;
+      }
       if (f.url && value && !isSafeUrl(value)) {
         return NextResponse.json({ error: `${f.label}: link phải bắt đầu bằng http:// hoặc https://` }, { status: 400 });
       }

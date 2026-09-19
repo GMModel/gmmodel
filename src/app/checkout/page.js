@@ -37,6 +37,7 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
+  const [firstOrder, setFirstOrder] = useState({ eligible: false, percent: 0, discountUsd: 0, signedIn: false });
   // { code, status: "cod" | "redirecting" | "crypto", address?, qrDataUrl?, amountUsd? }
   const [result, setResult] = useState(null);
 
@@ -104,13 +105,29 @@ export default function CheckoutPage() {
     }
   }
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/first-order?subtotal=${totalPriceUsd}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setFirstOrder(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [totalPriceUsd, user]);
+
   function handleRemoveCoupon() {
     setAppliedCoupon(null);
     setCouponInput("");
     setCouponError("");
   }
 
-  const discountUsd = appliedCoupon?.discountUsd ?? 0;
+  // First-order discount does not stack with a coupon: the bigger one wins (same rule as the server).
+  const couponDiscountUsd = appliedCoupon?.discountUsd ?? 0;
+  const useFirstOrder = firstOrder.eligible && firstOrder.discountUsd > couponDiscountUsd;
+  const discountUsd = useFirstOrder ? firstOrder.discountUsd : couponDiscountUsd;
   const finalTotalUsd = Math.max(0, totalPriceUsd - discountUsd);
 
   async function handlePlaceOrder() {
@@ -367,9 +384,17 @@ export default function CheckoutPage() {
                 </div>
                 {discountUsd > 0 ? (
                   <div className="flex justify-between text-green-400">
-                    <span>{t.checkout.discount}</span>
+                    <span>{useFirstOrder ? t.checkout.firstOrder.replace("{percent}", firstOrder.percent) : t.checkout.discount}</span>
                     <span>-{formatPrice(discountUsd)}</span>
                   </div>
+                ) : null}
+                {!user && firstOrder.percent > 0 ? (
+                  <p className="text-xs text-white/50">
+                    {t.checkout.firstOrderHint.replace("{percent}", firstOrder.percent)}{" "}
+                    <a href="/register" className="text-red-400 underline">
+                      {t.createAccount}
+                    </a>
+                  </p>
                 ) : null}
                 <div className="flex justify-between text-white/70">
                   <span>{t.checkout.shipping}</span>

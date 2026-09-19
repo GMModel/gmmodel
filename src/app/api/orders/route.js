@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { generateOrderCode } from "@/lib/orderCode";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { validateCoupon } from "@/lib/coupons";
+import { getFirstOrderDiscount, FIRST_ORDER_CODE } from "@/lib/firstOrder";
 
 const PAYMENT_METHODS = ["cod", "momo", "crypto", "paypal", "card"];
 
@@ -64,6 +65,8 @@ export async function POST(request) {
     return NextResponse.json({ error: "No valid items" }, { status: 400 });
   }
 
+  const user = await getCurrentUser();
+
   let discountUsd = 0;
   let appliedCoupon = null;
   if (couponCode) {
@@ -75,11 +78,25 @@ export async function POST(request) {
     appliedCoupon = result.coupon;
   }
 
-  const user = await getCurrentUser();
+  // First-order discount (signed-in customers only). It does not stack with a coupon:
+  // whichever gives the bigger discount is used.
+  const firstOrder = await getFirstOrderDiscount(user, totalUsd);
+  let usedFirstOrder = false;
+  if (firstOrder.eligible && firstOrder.discountUsd > discountUsd) {
+    discountUsd = firstOrder.discountUsd;
+    appliedCoupon = null;
+    usedFirstOrder = true;
+  }
+
   const code = generateOrderCode();
 
   try {
     const order = await prisma.$transaction(async (tx) => {
+      if (usedFirstOrder) {
+        // Re-check inside the transaction so a second order placed at the same moment cannot reuse the offer.
+        const again = await getFirstOrderDiscount(user, totalUsd, tx);
+        if (!again.eligible) throw new Error("Ưu đãi đơn đầu tiên không còn áp dụng, vui lòng tải lại trang thanh toán.");
+      }
       if (appliedCoupon) {
         const couponResult = await tx.coupon.updateMany({
           where: {
@@ -115,7 +132,7 @@ export async function POST(request) {
           phone: phone.trim(),
           address: address.trim(),
           totalUsd: totalUsd - discountUsd,
-          couponCode: appliedCoupon?.code ?? null,
+          couponCode: usedFirstOrder ? FIRST_ORDER_CODE : appliedCoupon?.code ?? null,
           discountUsd,
           paymentMethod,
           paymentStatus: paymentMethod === "cod" ? "cod_pending" : "pending",
