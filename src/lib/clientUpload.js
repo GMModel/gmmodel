@@ -8,7 +8,7 @@ import { upload } from "@vercel/blob/client";
 //    which avoids the 4.5MB request limit of serverless functions (large photos and videos work)
 
 const MAX_SIDE = 2000;
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime"];
 
 async function decode(file) {
@@ -75,10 +75,10 @@ export function isVideoFile(file) {
 }
 
 // Uploads an image or video and returns its public URL. Throws an Error with a Vietnamese message.
-export async function uploadMedia(file) {
+export async function uploadMedia(file, onProgress) {
   let toSend = file;
   if (isVideoFile(file)) {
-    if (file.size > MAX_VIDEO_BYTES) throw new Error("Video vượt quá 50MB.");
+    if (file.size > MAX_VIDEO_BYTES) throw new Error("Video vượt quá 500MB. Hãy nén video nhỏ lại (ví dụ 720p) rồi thử lại.");
   } else if (file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || "")) {
     toSend = await prepareImage(file);
   } else {
@@ -91,6 +91,9 @@ export async function uploadMedia(file) {
       access: "public",
       handleUploadUrl: "/api/admin/upload-token",
       contentType: toSend.type || undefined,
+      // Big files are split into parts, uploaded in parallel and retried automatically.
+      multipart: toSend.size > 20 * 1024 * 1024,
+      onUploadProgress: (e) => onProgress?.(Math.round(e.percentage)),
     });
     return blob.url;
   } catch (err) {

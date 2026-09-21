@@ -43,6 +43,7 @@ export default function ProductForm({ product }) {
   });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,21 +68,23 @@ export default function ProductForm({ product }) {
   async function runUpload(fn) {
     setUploading(true);
     setUploadError("");
+    setUploadProgress(0);
     try {
       await fn();
     } catch (err) {
       setUploadError(err.message || "Tải lên thất bại");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   }
 
-  const handleUpload = (files) => runUpload(async () => update("imageUrl", await uploadMedia(files[0])));
-  const handleVideoUpload = (files) => runUpload(async () => update("videoUrl", await uploadMedia(files[0])));
+  const handleUpload = (files) => runUpload(async () => update("imageUrl", await uploadMedia(files[0], setUploadProgress)));
+  const handleVideoUpload = (files) => runUpload(async () => update("videoUrl", await uploadMedia(files[0], setUploadProgress)));
   const handleGalleryUpload = (files) =>
     runUpload(async () => {
       const urls = [];
-      for (const file of files) urls.push(await uploadMedia(file));
+      for (const file of files) urls.push(await uploadMedia(file, setUploadProgress));
       setForm((f) => ({ ...f, galleryUrls: [...f.galleryUrls, ...urls] }));
     });
 
@@ -203,6 +206,12 @@ export default function ProductForm({ product }) {
           <div>
             <label className={labelClass}>Giá bán (USD) *</label>
             <input required type="number" step="0.01" min="0" value={form.priceUsd} onChange={(e) => update("priceUsd", e.target.value)} className={inputClass} />
+            {Number(form.priceUsd) > 0 ? (
+              <p className={`mt-1 text-xs ${Number(form.priceUsd) > 2000 ? "font-medium text-red-600" : "text-slate-400"}`}>
+                Khách chọn tiếng Việt sẽ thấy ≈ {(Math.round((Number(form.priceUsd) * 25400) / 1000) * 1000).toLocaleString("vi-VN")}₫
+                {Number(form.priceUsd) > 2000 ? " — giá rất lớn! Ô này nhập bằng USD (ví dụ 14.5 ≈ 368.000₫), không nhập số tiền VNĐ." : ""}
+              </p>
+            ) : null}
           </div>
           <div>
             <label className={labelClass}>Giá gốc (USD) — để trống nếu không giảm giá</label>
@@ -241,7 +250,7 @@ export default function ProductForm({ product }) {
             <FilePickButton accept="image/*" disabled={uploading} onFiles={handleUpload}>
               Chọn ảnh từ thư viện
             </FilePickButton>
-            {uploading ? <p className="mt-2 text-xs text-slate-500">Đang tải lên, vui lòng đợi…</p> : null}
+            {uploading ? <p className="mt-2 text-xs text-slate-500">{uploadProgress > 0 ? `Đang tải lên ${uploadProgress}%…` : "Đang tải lên, vui lòng đợi…"}</p> : null}
             {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
             <div className="mt-3">
               <label className={labelClass}>Hoặc dán URL ảnh</label>
@@ -270,9 +279,9 @@ export default function ProductForm({ product }) {
             <FilePickButton accept="video/mp4,video/webm,video/quicktime,video/*" disabled={uploading} onFiles={handleVideoUpload}>
               Chọn video từ thư viện
             </FilePickButton>
-            {uploading ? <p className="mt-2 text-xs text-slate-500">Đang tải lên, vui lòng đợi…</p> : null}
+            {uploading ? <p className="mt-2 text-xs text-slate-500">{uploadProgress > 0 ? `Đang tải lên ${uploadProgress}%…` : "Đang tải lên, vui lòng đợi…"}</p> : null}
             {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
-            <p className="mt-1 text-xs text-slate-400">MP4, WEBM hoặc MOV, tối đa 50MB.</p>
+            <p className="mt-1 text-xs text-slate-400">MP4 (H.264) là tốt nhất, cũng nhận WEBM/MOV, tối đa 500MB. Video nhẹ (dưới khoảng 50MB) sẽ tải nhanh hơn cho khách xem.</p>
             <div className="mt-3">
               <label className={labelClass}>Hoặc dán URL video</label>
               <input value={form.videoUrl} onChange={(e) => update("videoUrl", e.target.value)} className={inputClass} placeholder="https://..." />
@@ -313,7 +322,7 @@ export default function ProductForm({ product }) {
             Thêm ảnh từ thư viện
           </FilePickButton>
         </div>
-        {uploading ? <p className="mt-2 text-xs text-slate-500">Đang tải lên, vui lòng đợi…</p> : null}
+        {uploading ? <p className="mt-2 text-xs text-slate-500">{uploadProgress > 0 ? `Đang tải lên ${uploadProgress}%…` : "Đang tải lên, vui lòng đợi…"}</p> : null}
         {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
       </div>
 
