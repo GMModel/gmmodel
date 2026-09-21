@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
+import { formatVnd } from "@/lib/money";
 import Link from "next/link";
 import {
   PAYMENT_METHOD_LABELS,
@@ -10,10 +11,6 @@ import {
   FULFILLMENT_ORDER,
   FULFILLMENT_STATUS_LABELS,
 } from "@/lib/adminLabels";
-
-function formatUsd(v) {
-  return `$${v.toFixed(2)}`;
-}
 
 export default function AdminOrderDetailPage({ params }) {
   const { code } = use(params);
@@ -86,19 +83,19 @@ export default function AdminOrderDetailPage({ params }) {
                     <p className="font-medium text-slate-800">{item.nameVi}</p>
                     <p className="text-xs text-slate-400">x{item.qty}</p>
                   </div>
-                  <p className="font-medium text-slate-900">{formatUsd(item.priceUsd * item.qty)}</p>
+                  <p className="font-medium text-slate-900">{formatVnd(item.priceUsd * item.qty)}</p>
                 </div>
               ))}
             </div>
             {order.discountUsd > 0 ? (
               <div className="mt-3 flex justify-between border-t border-slate-100 pt-3 text-sm text-green-600">
                 <span>Giảm giá {order.couponCode ? `(${order.couponCode})` : ""}</span>
-                <span>-{formatUsd(order.discountUsd)}</span>
+                <span>-{formatVnd(order.discountUsd)}</span>
               </div>
             ) : null}
             <div className="mt-3 flex justify-between border-t border-slate-100 pt-3 text-sm font-bold">
               <span>Tổng cộng</span>
-              <span>{formatUsd(order.totalUsd)}</span>
+              <span>{formatVnd(order.totalUsd)}</span>
             </div>
           </div>
 

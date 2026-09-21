@@ -38,7 +38,8 @@ export async function GET(request) {
   }
   if (country) {
     const group = (await getCountryGroups()).find((g) => g.slug === country);
-    where.carBrand = { in: group?.brands ?? [] };
+    // Products store either the origin slug (chosen in admin) or a legacy car make listed in the group.
+    where.carBrand = { in: [country, ...(group?.brands ?? [])] };
   }
   if (bodyStyle) {
     where.bodyStyle = bodyStyle;

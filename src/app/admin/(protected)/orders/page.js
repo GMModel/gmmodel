@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatVnd } from "@/lib/money";
 import Link from "next/link";
 import {
   PAYMENT_METHOD_LABELS,
@@ -13,10 +14,6 @@ import {
 } from "@/lib/adminLabels";
 
 const FULFILLMENT_OPTIONS = FULFILLMENT_ORDER.concat("cancelled");
-
-function formatUsd(v) {
-  return `$${v.toFixed(2)}`;
-}
 
 export default function AdminOrdersPage() {
   const [status, setStatus] = useState("all");
@@ -168,7 +165,7 @@ export default function AdminOrdersPage() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatUsd(order.totalUsd)}</td>
+                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatVnd(order.totalUsd)}</td>
                 </tr>
               ))
             )}

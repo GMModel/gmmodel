@@ -63,7 +63,7 @@ export default function ProductDetailClient({ params }) {
   const name = pickProductName(product, locale);
   const description = pickProductDescription(product, locale);
   const favorited = isWishlisted(product.id);
-  const countryGroup = countryGroups.find((g) => g.brands.includes(product.carBrand));
+  const countryGroup = countryGroups.find((g) => g.slug === product.carBrand || g.brands.includes(product.carBrand));
   const bodyStyle = BODY_STYLES.find((s) => s.slug === product.bodyStyle);
   const outOfStock = !product.isPreOrder && product.stockQty <= 0;
 

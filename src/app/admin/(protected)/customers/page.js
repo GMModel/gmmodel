@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-function formatUsd(v) {
-  return `$${Number(v).toFixed(2)}`;
-}
+import { formatVnd } from "@/lib/money";
 
 export default function AdminCustomersPage() {
   const [q, setQ] = useState("");
@@ -84,7 +81,7 @@ export default function AdminCustomersPage() {
                   </td>
                   <td className="px-3 py-3 sm:px-5 text-slate-500">{new Date(c.createdAt).toLocaleDateString("vi-VN")}</td>
                   <td className="px-3 py-3 sm:px-5 text-slate-600">{c.orderCount}</td>
-                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatUsd(c.totalSpentUsd)}</td>
+                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatVnd(c.totalSpentUsd)}</td>
                 </tr>
               ))
             )}

@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatVnd } from "@/lib/money";
 import Link from "next/link";
-
-function formatUsd(v) {
-  return `$${Number(v).toFixed(2)}`;
-}
 
 function StockBadge({ p }) {
   if (p.isPreOrder) return <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">Đặt trước</span>;
@@ -35,8 +32,8 @@ function MobileProductCard({ p, onDelete, deleting }) {
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-sm font-medium leading-snug text-slate-900">{p.nameVi}</p>
           <p className="mt-1 text-sm font-semibold text-slate-900">
-            {formatUsd(p.priceUsd)}
-            {p.compareAtUsd ? <span className="ml-1.5 text-xs font-normal text-slate-400 line-through">{formatUsd(p.compareAtUsd)}</span> : null}
+            {formatVnd(p.priceUsd)}
+            {p.compareAtUsd ? <span className="ml-1.5 text-xs font-normal text-slate-400 line-through">{formatVnd(p.compareAtUsd)}</span> : null}
           </p>
           <div className="mt-1.5">
             <StockBadge p={p} />
@@ -232,8 +229,8 @@ export default function AdminProductsPage() {
                     {p.brand?.name} · {p.scale?.label}
                   </td>
                   <td className="px-3 py-3 sm:px-5 text-slate-900">
-                    {formatUsd(p.priceUsd)}
-                    {p.compareAtUsd ? <span className="ml-1 text-xs text-slate-400 line-through">{formatUsd(p.compareAtUsd)}</span> : null}
+                    {formatVnd(p.priceUsd)}
+                    {p.compareAtUsd ? <span className="ml-1 text-xs text-slate-400 line-through">{formatVnd(p.compareAtUsd)}</span> : null}
                   </td>
                   <td className="px-3 py-3 sm:px-5">
                     {p.isPreOrder ? (

@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatVnd } from "@/lib/money";
 import Link from "next/link";
 import { PAYMENT_METHOD_LABELS, FULFILLMENT_STATUS_LABELS, FULFILLMENT_STATUS_COLORS } from "@/lib/adminLabels";
-
-function formatUsd(v) {
-  return `$${v.toFixed(2)}`;
-}
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -23,7 +20,7 @@ export default function AdminDashboardPage() {
         { label: "Tổng số đơn hàng", value: stats.totalOrders },
         { label: "Chờ xác nhận", value: stats.pendingConfirmation, highlight: stats.pendingConfirmation > 0 },
         { label: "Chờ xác nhận chuyển khoản", value: stats.awaitingVerification, highlight: stats.awaitingVerification > 0 },
-        { label: "Doanh thu đã thanh toán", value: formatUsd(stats.revenueUsd) },
+        { label: "Doanh thu đã thanh toán", value: formatVnd(stats.revenueUsd) },
       ]
     : [];
 
@@ -75,7 +72,7 @@ export default function AdminDashboardPage() {
                       {FULFILLMENT_STATUS_LABELS[order.fulfillmentStatus]}
                     </span>
                   </td>
-                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatUsd(order.totalUsd)}</td>
+                  <td className="px-3 py-3 sm:px-5 font-medium text-slate-900">{formatVnd(order.totalUsd)}</td>
                 </tr>
               ))}
               {stats && stats.recentOrders.length === 0 ? (

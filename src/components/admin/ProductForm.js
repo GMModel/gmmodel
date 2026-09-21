@@ -5,6 +5,7 @@ import { uploadMedia } from "@/lib/clientUpload";
 import { FilePickButton } from "@/components/admin/fields";
 import { useRouter } from "next/navigation";
 import { BODY_STYLES } from "@/lib/bodyStyles";
+import { usdToVnd, vndToUsd } from "@/lib/money";
 
 const CATEGORIES = [
   { value: "car", label: "Xe mô hình" },
@@ -19,7 +20,7 @@ export default function ProductForm({ product }) {
   const router = useRouter();
   const isEdit = Boolean(product);
 
-  const [meta, setMeta] = useState({ brands: [], scales: [] });
+  const [meta, setMeta] = useState({ brands: [], scales: [], countries: [] });
   const [form, setForm] = useState({
     nameVi: product?.nameVi ?? "",
     descriptionVi: product?.descriptionVi ?? "",
@@ -29,8 +30,8 @@ export default function ProductForm({ product }) {
     scaleId: product?.scaleId ?? "",
     carBrand: product?.carBrand ?? "",
     bodyStyle: product?.bodyStyle ?? "",
-    priceUsd: product?.priceUsd ?? "",
-    compareAtUsd: product?.compareAtUsd ?? "",
+    priceVnd: product?.priceUsd ? usdToVnd(product.priceUsd) : "",
+    compareAtVnd: product?.compareAtUsd ? usdToVnd(product.compareAtUsd) : "",
     stockQty: product?.stockQty ?? 20,
     imageUrl: product?.imageUrl ?? "",
     videoUrl: product?.videoUrl ?? "",
@@ -104,7 +105,11 @@ export default function ProductForm({ product }) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          priceUsd: vndToUsd(form.priceVnd),
+          compareAtUsd: form.compareAtVnd ? vndToUsd(form.compareAtVnd) : "",
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Có lỗi xảy ra");
@@ -183,8 +188,20 @@ export default function ProductForm({ product }) {
             </select>
           </div>
           <div>
-            <label className={labelClass}>Hãng xe (vd: Ford, Bentley...)</label>
-            <input value={form.carBrand} onChange={(e) => update("carBrand", e.target.value)} className={inputClass} />
+            <label className={labelClass}>Thương hiệu (xuất xứ: Đức, Pháp, Nhật...)</label>
+            <select
+              value={(meta.countries.find((g) => g.slug === form.carBrand || g.brands.includes(form.carBrand)) ?? {}).slug ?? ""}
+              onChange={(e) => update("carBrand", e.target.value)}
+              className={inputClass}
+            >
+              <option value="">— Không chọn —</option>
+              {meta.countries.map((g) => (
+                <option key={g.slug} value={g.slug}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-400">Khách lọc theo mục &quot;Thương hiệu&quot; trên menu. Thêm/sửa danh sách nước ở Nội dung website → Xuất xứ xe.</p>
           </div>
           <div>
             <label className={labelClass}>Kiểu dáng xe</label>
@@ -204,18 +221,17 @@ export default function ProductForm({ product }) {
         <h2 className="text-sm font-bold text-slate-900">Giá &amp; Tồn kho</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Giá bán (USD) *</label>
-            <input required type="number" step="0.01" min="0" value={form.priceUsd} onChange={(e) => update("priceUsd", e.target.value)} className={inputClass} />
-            {Number(form.priceUsd) > 0 ? (
-              <p className={`mt-1 text-xs ${Number(form.priceUsd) > 2000 ? "font-medium text-red-600" : "text-slate-400"}`}>
-                Khách chọn tiếng Việt sẽ thấy ≈ {(Math.round((Number(form.priceUsd) * 25400) / 1000) * 1000).toLocaleString("vi-VN")}₫
-                {Number(form.priceUsd) > 2000 ? " — giá rất lớn! Ô này nhập bằng USD (ví dụ 14.5 ≈ 368.000₫), không nhập số tiền VNĐ." : ""}
+            <label className={labelClass}>Giá bán (VNĐ) *</label>
+            <input required type="number" step="1000" min="0" inputMode="numeric" value={form.priceVnd} onChange={(e) => update("priceVnd", e.target.value)} className={inputClass} placeholder="vd: 369000" />
+            {Number(form.priceVnd) > 0 ? (
+              <p className="mt-1 text-xs text-slate-400">
+                Hiển thị {Number(form.priceVnd).toLocaleString("vi-VN")}₫ cho khách chọn tiếng Việt, ≈ ${vndToUsd(form.priceVnd).toFixed(2)} cho English / Español.
               </p>
             ) : null}
           </div>
           <div>
-            <label className={labelClass}>Giá gốc (USD) — để trống nếu không giảm giá</label>
-            <input type="number" step="0.01" min="0" value={form.compareAtUsd} onChange={(e) => update("compareAtUsd", e.target.value)} className={inputClass} />
+            <label className={labelClass}>Giá gốc (VNĐ) — để trống nếu không giảm giá</label>
+            <input type="number" step="1000" min="0" inputMode="numeric" value={form.compareAtVnd} onChange={(e) => update("compareAtVnd", e.target.value)} className={inputClass} placeholder="vd: 539000" />
           </div>
           <div>
             <label className={labelClass}>Số lượng tồn kho</label>

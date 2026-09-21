@@ -60,7 +60,7 @@ export default function CountriesTab() {
         <div>
           <h2 className="text-xl font-bold">Xuất xứ xe</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Các nhóm quốc gia dùng cho menu &quot;Thương hiệu&quot; và bộ lọc sản phẩm. Mỗi nhóm gồm các hãng xe (BMW, Toyota…) — ghi đúng tên hãng xe như đã nhập trong sản phẩm, cách nhau bằng dấu phẩy.
+            Danh sách nước (Đức, Pháp, Nhật...) hiện trong ô Thương hiệu khi nhập sản phẩm, và dùng cho menu &quot;Thương hiệu&quot; và bộ lọc sản phẩm. Mỗi nhóm gồm các hãng xe (BMW, Toyota…) — ghi đúng tên hãng xe như đã nhập trong sản phẩm, cách nhau bằng dấu phẩy.
           </p>
         </div>
         <div className="flex gap-2">
