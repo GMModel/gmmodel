@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { generateOrderCode } from "@/lib/orderCode";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { validateCoupon } from "@/lib/coupons";
-import { resolveSelection, selectionText } from "@/lib/variants";
+import { resolveSelection, variantText } from "@/lib/variants";
 import { getFirstOrderDiscount, FIRST_ORDER_CODE } from "@/lib/firstOrder";
 
 const PAYMENT_METHODS = ["cod", "momo", "crypto", "paypal", "card"];
@@ -46,20 +46,24 @@ export async function POST(request) {
     const product = productById.get(item.productId);
     const qty = Math.max(1, Math.floor(item.qty ?? 1));
     if (!product) continue;
-    if (!product.isPreOrder && product.stockQty < qty) {
-      return NextResponse.json(
-        { error: `"${product.nameVi}" chỉ còn ${product.stockQty} sản phẩm trong kho.` },
-        { status: 400 }
-      );
-    }
-    // Products with colors/types: the customer must have picked one value per group; the price is
-    // recomputed here from the product, never trusted from the browser.
-    const selection = resolveSelection(product.variants, item.options);
+
+    // Products with colors/types: the customer must have picked a valid phân loại. The price and
+    // stock always come from that option, recomputed here from the product — never trusted from the browser.
+    const selection = resolveSelection(product.variants, item.variant);
     if (!selection.ok) {
       return NextResponse.json({ error: `"${product.nameVi}": ${selection.error}` }, { status: 400 });
     }
-    const unitUsd = product.priceUsd + selection.extraUsd;
-    const suffix = (loc) => (selection.chosen.length ? ` (${selectionText(selection.chosen, loc)})` : "");
+    const chosen = selection.item;
+    const unitUsd = chosen ? chosen.priceUsd : product.priceUsd;
+    const availableStock = chosen ? chosen.stockQty : product.stockQty;
+    if (!product.isPreOrder && availableStock < qty) {
+      const label = chosen ? ` (${variantText(chosen, "label", "vi")})` : "";
+      return NextResponse.json(
+        { error: `"${product.nameVi}${label}" chỉ còn ${availableStock} sản phẩm trong kho.` },
+        { status: 400 }
+      );
+    }
+    const suffix = (loc) => (chosen ? ` (${variantText(chosen, "label", loc)})` : "");
     totalUsd += unitUsd * qty;
     orderItemsData.push({
       productId: product.id,
@@ -67,6 +71,7 @@ export async function POST(request) {
       nameEn: `${product.nameEn}${suffix("en")}`,
       priceUsd: unitUsd,
       qty,
+      variantLabel: chosen?.label ?? null,
     });
   }
 
@@ -123,12 +128,30 @@ export async function POST(request) {
       for (const item of orderItemsData) {
         const product = productById.get(item.productId);
         if (product.isPreOrder) continue;
-        const result = await tx.product.updateMany({
-          where: { id: item.productId, stockQty: { gte: item.qty } },
-          data: { stockQty: { decrement: item.qty } },
-        });
-        if (result.count === 0) {
-          throw new Error(`"${product.nameVi}" vừa hết hàng.`);
+
+        if (item.variantLabel) {
+          // Stock lives inside the JSON `variants` array, so it can't use an atomic numeric
+          // decrement like the base product. This read-then-write has a small race window under
+          // heavy concurrent orders for the same option, acceptable at this shop's scale.
+          const fresh = await tx.product.findUnique({ where: { id: item.productId }, select: { variants: true } });
+          const list = Array.isArray(fresh?.variants) ? fresh.variants : [];
+          const idx = list.findIndex((v) => v.label === item.variantLabel);
+          if (idx === -1 || list[idx].stockQty < item.qty) {
+            throw new Error(`"${product.nameVi}" vừa hết hàng.`);
+          }
+          const nextVariants = list.map((v, i) => (i === idx ? { ...v, stockQty: v.stockQty - item.qty } : v));
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { variants: nextVariants, stockQty: nextVariants.reduce((sum, v) => sum + v.stockQty, 0) },
+          });
+        } else {
+          const result = await tx.product.updateMany({
+            where: { id: item.productId, stockQty: { gte: item.qty } },
+            data: { stockQty: { decrement: item.qty } },
+          });
+          if (result.count === 0) {
+            throw new Error(`"${product.nameVi}" vừa hết hàng.`);
+          }
         }
       }
 
@@ -145,7 +168,7 @@ export async function POST(request) {
           discountUsd,
           paymentMethod,
           paymentStatus: paymentMethod === "cod" ? "cod_pending" : "pending",
-          items: { create: orderItemsData },
+          items: { create: orderItemsData.map(({ variantLabel, ...rest }) => rest) },
         },
       });
     });

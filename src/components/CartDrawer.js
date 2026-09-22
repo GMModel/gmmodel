@@ -57,9 +57,9 @@ export default function CartDrawer() {
                     <p className="line-clamp-2 text-xs font-medium">
                       {pickProductName(item, locale)}
                     </p>
-                    {item.variantOptions?.length ? (
+                    {item.variantOption ? (
                       <p className="mt-0.5 text-[11px] text-white/50">
-                        {item.variantOptions.map((o) => `${variantText(o, "group", locale)}: ${variantText(o, "value", locale)}`).join(" · ")}
+                        {t.productSection.variantLabel}: {variantText(item.variantOption, "label", locale)}
                       </p>
                     ) : null}
                     <div className="mt-1 flex items-center gap-2 text-xs">

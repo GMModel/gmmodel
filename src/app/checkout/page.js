@@ -160,7 +160,7 @@ export default function CheckoutPage() {
           items: items.map((i) => ({
             productId: i.id,
             qty: i.qty,
-            options: i.variantOptions?.map((o) => ({ group: o.group, value: o.value })) ?? undefined,
+            variant: i.variantOption?.label ?? undefined,
           })),
           paymentMethod: method,
           ...shipping,
@@ -344,9 +344,9 @@ export default function CheckoutPage() {
                       <p className="line-clamp-1 text-sm font-medium">
                         {pickProductName(item, locale)}
                       </p>
-                      {item.variantOptions?.length ? (
+                      {item.variantOption ? (
                         <p className="text-[11px] text-white/50">
-                          {item.variantOptions.map((o) => `${variantText(o, "group", locale)}: ${variantText(o, "value", locale)}`).join(" · ")}
+                          {t.productSection.variantLabel}: {variantText(item.variantOption, "label", locale)}
                         </p>
                       ) : null}
                       <p className="text-xs text-white/50">x{item.qty}</p>

@@ -30,7 +30,7 @@ export function CartProvider({ children }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items, hydrated]);
 
-  // `variant` (optional): { key, options: [{ group, value, groupEn, valueEn, groupEs, valueEs }], extraUsd, imageUrl }
+  // `variant` (optional): { key, unitUsd, imageUrl, option: { label, labelEn, labelEs } }
   function addItem(product, qty = 1, variant = null) {
     const key = variant?.key ? `${product.id}#${variant.key}` : String(product.id);
     setItems((prev) => {
@@ -46,11 +46,11 @@ export function CartProvider({ children }) {
           slug: product.slug,
           nameEn: product.nameEn,
           nameVi: product.nameVi,
-          priceUsd: product.priceUsd + (variant?.extraUsd || 0),
+          priceUsd: variant ? variant.unitUsd : product.priceUsd,
           imageUrl: variant?.imageUrl || product.imageUrl,
           imageColor: product.imageColor,
           scaleLabel: product.scale?.label,
-          variantOptions: variant?.options ?? null,
+          variantOption: variant?.option ?? null,
           qty,
         },
       ];
