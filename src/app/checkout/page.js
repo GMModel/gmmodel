@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
-import { useCart } from "@/context/CartContext";
+import { useCart, itemKey } from "@/context/CartContext";
+import { variantText } from "@/lib/variants";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
@@ -156,7 +157,11 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: items.map((i) => ({ productId: i.id, qty: i.qty })),
+          items: items.map((i) => ({
+            productId: i.id,
+            qty: i.qty,
+            options: i.variantOptions?.map((o) => ({ group: o.group, value: o.value })) ?? undefined,
+          })),
           paymentMethod: method,
           ...shipping,
           email: email.trim() || null,
@@ -327,7 +332,7 @@ export default function CheckoutPage() {
             <div className="mt-6 rounded-lg border border-white/10 bg-neutral-950 p-6">
               <ul className="flex flex-col gap-4">
                 {items.map((item) => (
-                  <li key={item.id} className="flex items-center gap-3">
+                  <li key={itemKey(item)} className="flex items-center gap-3">
                     <ModelThumb
                       color={item.imageColor}
                       src={item.imageUrl}
@@ -339,6 +344,11 @@ export default function CheckoutPage() {
                       <p className="line-clamp-1 text-sm font-medium">
                         {pickProductName(item, locale)}
                       </p>
+                      {item.variantOptions?.length ? (
+                        <p className="text-[11px] text-white/50">
+                          {item.variantOptions.map((o) => `${variantText(o, "group", locale)}: ${variantText(o, "value", locale)}`).join(" · ")}
+                        </p>
+                      ) : null}
                       <p className="text-xs text-white/50">x{item.qty}</p>
                     </div>
                     <span className="text-sm font-bold text-red-500">

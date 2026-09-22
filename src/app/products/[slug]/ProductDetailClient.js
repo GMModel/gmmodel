@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
 import { useCart } from "@/context/CartContext";
+import { hasVariants, variantText, resolveSelection, selectionKey } from "@/lib/variants";
 import { useWishlist } from "@/context/WishlistContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -20,9 +21,11 @@ export default function ProductDetailClient({ params }) {
   const [product, setProduct] = useState(undefined);
   const [added, setAdded] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [picked, setPicked] = useState({}); // { <group name>: <value label> }
 
   useEffect(() => {
     setProduct(undefined);
+    setPicked({});
     fetch(`/api/products/${slug}`)
       .then((res) => (res.ok ? res.json() : null))
       .then(setProduct)
@@ -67,8 +70,33 @@ export default function ProductDetailClient({ params }) {
   const bodyStyle = BODY_STYLES.find((s) => s.slug === product.bodyStyle);
   const outOfStock = !product.isPreOrder && product.stockQty <= 0;
 
+  // Options: each group defaults to its first value until the customer picks another.
+  const groups = hasVariants(product) ? product.variants : [];
+  const selection = resolveSelection(
+    groups,
+    groups.map((g) => ({ group: g.name, value: picked[g.name] ?? g.values[0]?.label })),
+  );
+  const extraUsd = selection.ok ? selection.extraUsd : 0;
+  const optionImage = selection.ok ? [...selection.chosen].reverse().find((c) => c.value.imageUrl)?.value.imageUrl : "";
+  const unitPriceUsd = product.priceUsd + extraUsd;
+
   function handleAddToCart() {
-    addItem(product);
+    const variant = groups.length && selection.ok
+      ? {
+          key: selectionKey(selection.chosen),
+          extraUsd,
+          imageUrl: optionImage || undefined,
+          options: selection.chosen.map((c) => ({
+            group: c.group.name,
+            groupEn: c.group.nameEn,
+            groupEs: c.group.nameEs,
+            value: c.value.label,
+            valueEn: c.value.labelEn,
+            valueEs: c.value.labelEs,
+          })),
+        }
+      : null;
+    addItem(product, 1, variant);
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
   }
@@ -102,7 +130,7 @@ export default function ProductDetailClient({ params }) {
                 ) : (
                   <ModelThumb
                     color={product.imageColor}
-                    src={product.imageUrl}
+                    src={optionImage || product.imageUrl}
                     alt={name}
                     scaleLabel={product.scale?.label}
                     className="h-80 w-full md:h-[420px]"
@@ -168,10 +196,52 @@ export default function ProductDetailClient({ params }) {
 
               <div className="flex items-baseline gap-3">
                 {product.compareAtUsd ? (
-                  <span className="text-base text-white/40 line-through">{formatPrice(product.compareAtUsd)}</span>
+                  <span className="text-base text-white/40 line-through">{formatPrice(product.compareAtUsd + extraUsd)}</span>
                 ) : null}
-                <span className="text-2xl font-bold text-red-500">{formatPrice(product.priceUsd)}</span>
+                <span className="text-2xl font-bold text-red-500">{formatPrice(unitPriceUsd)}</span>
               </div>
+
+              {groups.map((g) => {
+                const current = picked[g.name] ?? g.values[0]?.label;
+                const currentValue = g.values.find((v) => v.label === current);
+                return (
+                  <div key={g.name}>
+                    <div className="mb-2 text-sm">
+                      <span className="font-semibold">{variantText(g, "name", locale)}:</span>{" "}
+                      <span className="text-white/70">{currentValue ? variantText(currentValue, "label", locale) : ""}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {g.values.map((v) => {
+                        const active = v.label === current;
+                        const label = variantText(v, "label", locale);
+                        return g.type === "color" ? (
+                          <button
+                            key={v.label}
+                            type="button"
+                            title={label}
+                            aria-label={label}
+                            aria-pressed={active}
+                            onClick={() => setPicked((p) => ({ ...p, [g.name]: v.label }))}
+                            className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-red-500 ring-2 ring-red-500/40" : "border-white/30 hover:border-white"}`}
+                            style={{ backgroundColor: v.color }}
+                          />
+                        ) : (
+                          <button
+                            key={v.label}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => setPicked((p) => ({ ...p, [g.name]: v.label }))}
+                            className={`rounded border px-3 py-2 text-sm font-medium transition ${active ? "border-red-500 bg-red-600/20 text-white" : "border-white/30 text-white/80 hover:border-white"}`}
+                          >
+                            {label}
+                            {v.extraUsd ? <span className="ml-1 text-xs text-white/50">{v.extraUsd > 0 ? "+" : "-"}{formatPrice(Math.abs(v.extraUsd))}</span> : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
 
               <button
                 onClick={handleAddToCart}

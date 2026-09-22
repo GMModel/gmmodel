@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { generateOrderCode } from "@/lib/orderCode";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { validateCoupon } from "@/lib/coupons";
+import { resolveSelection, selectionText } from "@/lib/variants";
 import { getFirstOrderDiscount, FIRST_ORDER_CODE } from "@/lib/firstOrder";
 
 const PAYMENT_METHODS = ["cod", "momo", "crypto", "paypal", "card"];
@@ -51,12 +52,20 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    totalUsd += product.priceUsd * qty;
+    // Products with colors/types: the customer must have picked one value per group; the price is
+    // recomputed here from the product, never trusted from the browser.
+    const selection = resolveSelection(product.variants, item.options);
+    if (!selection.ok) {
+      return NextResponse.json({ error: `"${product.nameVi}": ${selection.error}` }, { status: 400 });
+    }
+    const unitUsd = product.priceUsd + selection.extraUsd;
+    const suffix = (loc) => (selection.chosen.length ? ` (${selectionText(selection.chosen, loc)})` : "");
+    totalUsd += unitUsd * qty;
     orderItemsData.push({
       productId: product.id,
-      nameVi: product.nameVi,
-      nameEn: product.nameEn,
-      priceUsd: product.priceUsd,
+      nameVi: `${product.nameVi}${suffix("vi")}`,
+      nameEn: `${product.nameEn}${suffix("en")}`,
+      priceUsd: unitUsd,
       qty,
     });
   }

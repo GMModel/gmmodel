@@ -5,6 +5,11 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 const CartContext = createContext(null);
 const STORAGE_KEY = "yourshop_cart";
 
+// A cart line is identified by product + chosen options (old saved carts have no key: use the product id).
+export function itemKey(item) {
+  return item.key ?? String(item.id);
+}
+
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -25,23 +30,27 @@ export function CartProvider({ children }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items, hydrated]);
 
-  function addItem(product, qty = 1) {
+  // `variant` (optional): { key, options: [{ group, value, groupEn, valueEn, groupEs, valueEs }], extraUsd, imageUrl }
+  function addItem(product, qty = 1, variant = null) {
+    const key = variant?.key ? `${product.id}#${variant.key}` : String(product.id);
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
+      const existing = prev.find((i) => itemKey(i) === key);
       if (existing) {
-        return prev.map((i) => (i.id === product.id ? { ...i, qty: i.qty + qty } : i));
+        return prev.map((i) => (itemKey(i) === key ? { ...i, qty: i.qty + qty } : i));
       }
       return [
         ...prev,
         {
+          key,
           id: product.id,
           slug: product.slug,
           nameEn: product.nameEn,
           nameVi: product.nameVi,
-          priceUsd: product.priceUsd,
-          imageUrl: product.imageUrl,
+          priceUsd: product.priceUsd + (variant?.extraUsd || 0),
+          imageUrl: variant?.imageUrl || product.imageUrl,
           imageColor: product.imageColor,
           scaleLabel: product.scale?.label,
+          variantOptions: variant?.options ?? null,
           qty,
         },
       ];
@@ -49,13 +58,13 @@ export function CartProvider({ children }) {
     setIsOpen(true);
   }
 
-  function removeItem(id) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  function removeItem(key) {
+    setItems((prev) => prev.filter((i) => itemKey(i) !== key));
   }
 
-  function updateQty(id, qty) {
+  function updateQty(key, qty) {
     if (qty < 1) return;
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)));
+    setItems((prev) => prev.map((i) => (itemKey(i) === key ? { ...i, qty } : i)));
   }
 
   function clear() {

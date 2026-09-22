@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
-import { useCart } from "@/context/CartContext";
+import { useCart, itemKey } from "@/context/CartContext";
+import { variantText } from "@/lib/variants";
 import ModelThumb from "./ModelThumb";
 import { pickProductName } from "@/lib/i18n";
 
@@ -44,7 +45,7 @@ export default function CartDrawer() {
           ) : (
             <ul className="flex flex-col gap-4">
               {items.map((item) => (
-                <li key={item.id} className="flex gap-3">
+                <li key={itemKey(item)} className="flex gap-3">
                   <ModelThumb
                     color={item.imageColor}
                     src={item.imageUrl}
@@ -56,16 +57,21 @@ export default function CartDrawer() {
                     <p className="line-clamp-2 text-xs font-medium">
                       {pickProductName(item, locale)}
                     </p>
+                    {item.variantOptions?.length ? (
+                      <p className="mt-0.5 text-[11px] text-white/50">
+                        {item.variantOptions.map((o) => `${variantText(o, "group", locale)}: ${variantText(o, "value", locale)}`).join(" · ")}
+                      </p>
+                    ) : null}
                     <div className="mt-1 flex items-center gap-2 text-xs">
                       <button
-                        onClick={() => updateQty(item.id, item.qty - 1)}
+                        onClick={() => updateQty(itemKey(item), item.qty - 1)}
                         className="flex h-6 w-6 items-center justify-center rounded border border-white/20 hover:border-white/50"
                       >
                         −
                       </button>
                       <span>{item.qty}</span>
                       <button
-                        onClick={() => updateQty(item.id, item.qty + 1)}
+                        onClick={() => updateQty(itemKey(item), item.qty + 1)}
                         className="flex h-6 w-6 items-center justify-center rounded border border-white/20 hover:border-white/50"
                       >
                         +
@@ -76,7 +82,7 @@ export default function CartDrawer() {
                         {formatPrice(item.priceUsd * item.qty)}
                       </span>
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(itemKey(item))}
                         className="text-[11px] text-white/40 hover:text-white"
                       >
                         {t.cart.remove}

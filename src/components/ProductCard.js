@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import ModelThumb from "./ModelThumb";
 import { pickProductName } from "@/lib/i18n";
+import { hasVariants } from "@/lib/variants";
 
 export default function ProductCard({ product, highlight = false, meta = null }) {
   const { locale, formatPrice, t } = useStore();
@@ -16,6 +17,8 @@ export default function ProductCard({ product, highlight = false, meta = null })
   const name = pickProductName(product, locale);
   const favorited = isWishlisted(product.id);
   const outOfStock = !product.isPreOrder && product.stockQty <= 0;
+  const withOptions = hasVariants(product);
+  const swatches = withOptions ? (product.variants.find((g) => g.type === "color")?.values ?? []).slice(0, 6) : [];
 
   function handleAddToCart() {
     addItem(product);
@@ -80,6 +83,21 @@ export default function ProductCard({ product, highlight = false, meta = null })
           ) : null}
           <span className="font-bold text-red-500">{formatPrice(product.priceUsd)}</span>
         </div>
+        {swatches.length ? (
+          <div className="mt-1 flex items-center gap-1">
+            {swatches.map((v) => (
+              <span key={v.label} title={v.label} className="h-3.5 w-3.5 rounded-full border border-white/30" style={{ backgroundColor: v.color }} />
+            ))}
+          </div>
+        ) : null}
+        {withOptions && !outOfStock ? (
+          <Link
+            href={`/products/${product.slug}`}
+            className="mt-2 flex items-center justify-center gap-1.5 rounded border border-white bg-white py-2 text-xs font-semibold text-black transition-colors hover:bg-transparent hover:text-white"
+          >
+            {t.productSection.chooseOptions}
+          </Link>
+        ) : (
         <button
           onClick={handleAddToCart}
           disabled={outOfStock}
@@ -104,6 +122,7 @@ export default function ProductCard({ product, highlight = false, meta = null })
             ? t.preorderSection.cta
             : t.productSection.addToCart}
         </button>
+        )}
       </div>
     </div>
   );

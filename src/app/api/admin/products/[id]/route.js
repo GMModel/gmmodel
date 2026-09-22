@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAdmin } from "@/lib/auth";
 import { translateProductFields } from "@/lib/translate";
+import { buildVariantsForSave } from "@/lib/variantsServer";
+import { Prisma } from "@/generated/prisma/client";
 
 export async function GET(request, { params }) {
   const admin = await getCurrentAdmin();
@@ -49,6 +51,11 @@ export async function PATCH(request, { params }) {
   if (body.videoUrl !== undefined) data.videoUrl = body.videoUrl || null;
   if (body.galleryUrls !== undefined) data.galleryUrls = Array.isArray(body.galleryUrls) ? body.galleryUrls.filter(Boolean) : [];
   if (body.carBrand !== undefined) data.carBrand = body.carBrand || null;
+  if (body.variants !== undefined) {
+    const current = await prisma.product.findUnique({ where: { id: Number(id) }, select: { variants: true } });
+    const built = await buildVariantsForSave(body.variants, current?.variants);
+    data.variants = built ?? Prisma.DbNull;
+  }
   if (body.bodyStyle !== undefined) data.bodyStyle = body.bodyStyle || null;
   if (body.badge !== undefined) data.badge = body.badge || null;
   if (body.brandId !== undefined) data.brandId = Number(body.brandId);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAdmin } from "@/lib/auth";
+import { buildVariantsForSave } from "@/lib/variantsServer";
 import { translateProductFields } from "@/lib/translate";
 
 const PAGE_SIZE = 20;
@@ -64,6 +65,8 @@ export async function POST(request) {
     descriptionVi: body.descriptionVi,
   });
 
+  const variants = await buildVariantsForSave(body.variants, null);
+
   let slug = body.slug?.trim() ? slugify(body.slug) : slugify(nameVi);
   const existing = await prisma.product.findUnique({ where: { slug } });
   if (existing) {
@@ -87,6 +90,7 @@ export async function POST(request) {
       videoUrl: body.videoUrl || null,
       galleryUrls: Array.isArray(body.galleryUrls) ? body.galleryUrls.filter(Boolean) : [],
       carBrand: body.carBrand || null,
+      variants: variants ?? undefined,
       bodyStyle: body.bodyStyle || null,
       badge: body.badge || null,
       brandId: Number(brandId),

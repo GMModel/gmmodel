@@ -6,6 +6,7 @@ import { FilePickButton } from "@/components/admin/fields";
 import { useRouter } from "next/navigation";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 import { usdToVnd, vndToUsd } from "@/lib/money";
+import VariantsEditor, { toFormVariants, fromFormVariants } from "@/components/admin/VariantsEditor";
 
 const CATEGORIES = [
   { value: "car", label: "Xe mô hình" },
@@ -41,6 +42,7 @@ export default function ProductForm({ product }) {
     isNewArrival: product?.isNewArrival ?? false,
     isPreOrder: product?.isPreOrder ?? false,
     isBestSeller: product?.isBestSeller ?? false,
+    variants: toFormVariants(product?.variants),
   });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -109,6 +111,7 @@ export default function ProductForm({ product }) {
           ...form,
           priceUsd: vndToUsd(form.priceVnd),
           compareAtUsd: form.compareAtVnd ? vndToUsd(form.compareAtVnd) : "",
+          variants: fromFormVariants(form.variants),
         }),
       });
       const data = await res.json();
@@ -250,6 +253,8 @@ export default function ProductForm({ product }) {
           </div>
         </div>
       </div>
+
+      <VariantsEditor groups={form.variants} onChange={(variants) => update("variants", variants)} />
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Ảnh đại diện</h2>

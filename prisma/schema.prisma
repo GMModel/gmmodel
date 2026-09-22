@@ -39,6 +39,7 @@ model Product {
   imageUrl      String?
   videoUrl      String?
   galleryUrls   String[] @default([])
+  variants      Json?
   carBrand      String?
   bodyStyle     String?
   badge         String?
