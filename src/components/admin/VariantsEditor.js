@@ -3,119 +3,154 @@
 import { useState } from "react";
 import { ImageField, btnClass } from "@/components/admin/fields";
 import { usdToVnd, vndToUsd } from "@/lib/money";
-import { MAX_VALUES } from "@/lib/variants";
+import { MAX_GROUPS, MAX_VALUES } from "@/lib/variants";
 
 const inputClass = "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900";
 const labelClass = "text-xs font-semibold text-slate-600";
 
-export const blankVariantRow = () => ({ label: "", color: "", imageUrl: "", priceVnd: "", stockQty: 20 });
-
-// Server data (priceUsd) <-> form data (priceVnd, admin works in VND)
+// Server data (extraUsd) <-> form data (extraVnd)
 export function toFormVariants(variants) {
-  const rows = (Array.isArray(variants) ? variants : []).map((v) => ({
-    label: v.label ?? "",
-    color: v.color || "",
-    imageUrl: v.imageUrl ?? "",
-    priceVnd: v.priceUsd ? usdToVnd(v.priceUsd) : "",
-    stockQty: v.stockQty ?? 0,
+  return (Array.isArray(variants) ? variants : []).map((g) => ({
+    name: g.name ?? "",
+    type: g.type === "color" ? "color" : "text",
+    values: (g.values ?? []).map((v) => ({
+      label: v.label ?? "",
+      color: v.color || "#9ca3af",
+      imageUrl: v.imageUrl ?? "",
+      extraVnd: v.extraUsd ? usdToVnd(v.extraUsd) : "",
+    })),
   }));
-  return rows.length ? rows : [blankVariantRow()];
 }
 
-export function fromFormVariants(rows) {
-  return rows
-    .filter((r) => r.label.trim())
-    .map((r) => ({
-      label: r.label.trim(),
-      color: r.color,
-      imageUrl: r.imageUrl,
-      priceUsd: r.priceVnd ? vndToUsd(r.priceVnd) : 0,
-      stockQty: Math.max(0, Math.floor(Number(r.stockQty) || 0)),
-    }));
+export function fromFormVariants(groups) {
+  return groups.map((g) => ({
+    name: g.name,
+    type: g.type,
+    values: g.values.map((v) => ({
+      label: v.label,
+      color: v.color,
+      imageUrl: v.imageUrl,
+      extraUsd: v.extraVnd !== "" && Number(v.extraVnd) !== 0 ? vndToUsd(v.extraVnd) : 0,
+    })),
+  }));
 }
 
-// A flat "detail table" of options: each row has its own price and stock, shown as stacked
-// cards (works the same on phones and desktop). Used when the product has multiple phân loại.
-export default function VariantsEditor({ rows, onChange }) {
+export default function VariantsEditor({ groups, onChange }) {
   const [uploadErr, setUploadErr] = useState("");
-  const setRow = (i, patch) => onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  const setGroup = (gi, patch) => onChange(groups.map((g, i) => (i === gi ? { ...g, ...patch } : g)));
+  const setValue = (gi, vi, patch) =>
+    setGroup(gi, { values: groups[gi].values.map((v, i) => (i === vi ? { ...v, ...patch } : v)) });
+  const addGroup = (name, type) => onChange([...groups, { name, type, values: [{ label: "", color: "#9ca3af", imageUrl: "", extraVnd: "" }] }]);
 
   return (
-    <div className="mt-4 space-y-3">
-      <p className="text-xs text-slate-400">
-        Mỗi phân loại có giá và tồn kho riêng. Chỉ cần nhập tiếng Việt, bản English/Español tự dịch khi lưu. Màu và ảnh riêng không bắt buộc — có màu thì
-        khách thấy ô màu tròn, không có màu thì hiện nút chữ.
+    <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <h2 className="text-sm font-bold text-slate-900">Màu sắc &amp; phân loại</h2>
+      <p className="mt-1 text-xs text-slate-400">
+        Dùng khi một sản phẩm có nhiều màu hoặc nhiều loại/phiên bản. Khách chọn trên trang sản phẩm; mỗi lựa chọn có thể có ảnh riêng và giá cộng thêm.
+        Chỉ cần nhập tiếng Việt, bản English/Español tự dịch khi lưu. Không có thì để trống.
       </p>
-      {uploadErr ? <p className="text-xs font-medium text-red-600">{uploadErr}</p> : null}
 
-      <div className="space-y-3">
-        {rows.map((r, i) => (
-          <div key={i} className="rounded-xl border border-slate-200 p-3 sm:p-4">
-            <div className="flex items-start justify-between gap-3">
-              <span className="text-xs font-semibold text-slate-500">Phân loại {i + 1}</span>
-              {rows.length > 1 ? (
-                <button type="button" onClick={() => onChange(rows.filter((_, j) => j !== i))} className="text-xs font-semibold text-red-600 hover:underline">
-                  Xoá
+      {uploadErr ? <p className="mt-3 text-xs font-medium text-red-600">{uploadErr}</p> : null}
+
+      <div className="mt-4 space-y-4">
+        {groups.map((g, gi) => (
+          <div key={gi} className="rounded-xl border border-slate-200 p-3 sm:p-4">
+            <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto] sm:items-end">
+              <div>
+                <label className={labelClass}>Tên nhóm (vd: Màu sắc, Loại, Phiên bản)</label>
+                <input value={g.name} onChange={(e) => setGroup(gi, { name: e.target.value })} className={inputClass} placeholder="Màu sắc" />
+              </div>
+              <div>
+                <label className={labelClass}>Kiểu hiển thị</label>
+                <select value={g.type} onChange={(e) => setGroup(gi, { type: e.target.value })} className={inputClass}>
+                  <option value="color">Ô màu tròn</option>
+                  <option value="text">Nút chữ</option>
+                </select>
+              </div>
+              <button type="button" onClick={() => onChange(groups.filter((_, i) => i !== gi))} className={`${btnClass} text-red-600`}>
+                Xoá nhóm
+              </button>
+            </div>
+
+            <div className="mt-3 space-y-3">
+              {g.values.map((v, vi) => (
+                <div key={vi} className="rounded-lg bg-slate-50 p-3">
+                  <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                    <div>
+                      <label className={labelClass}>Tên lựa chọn (vd: Trắng, Đen, Cao cấp)</label>
+                      <input value={v.label} onChange={(e) => setValue(gi, vi, { label: e.target.value })} className={inputClass} />
+                    </div>
+                    {g.type === "color" ? (
+                      <div>
+                        <label className={labelClass}>Màu</label>
+                        <input
+                          type="color"
+                          value={v.color}
+                          onChange={(e) => setValue(gi, vi, { color: e.target.value })}
+                          className="mt-1 block h-10 w-16 cursor-pointer rounded border border-slate-300 bg-white p-1"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="mt-3">
+                    <label className={labelClass}>Giá cộng thêm (VNĐ, để trống nếu bằng giá gốc)</label>
+                    <input
+                      type="number"
+                      step="1000"
+                      inputMode="numeric"
+                      value={v.extraVnd}
+                      onChange={(e) => setValue(gi, vi, { extraVnd: e.target.value })}
+                      className={inputClass}
+                      placeholder="vd: 50000"
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <p className={labelClass}>Ảnh riêng cho lựa chọn này (không bắt buộc, khách chọn sẽ thấy đổi ảnh)</p>
+                    <div className="mt-2">
+                      <ImageField value={v.imageUrl} onChange={(url) => setValue(gi, vi, { imageUrl: url })} onError={setUploadErr} height="h-14" />
+                    </div>
+                  </div>
+                  {g.values.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setGroup(gi, { values: g.values.filter((_, i) => i !== vi) })}
+                      className="mt-3 text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Xoá lựa chọn này
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+              {g.values.length < MAX_VALUES ? (
+                <button
+                  type="button"
+                  onClick={() => setGroup(gi, { values: [...g.values, { label: "", color: "#9ca3af", imageUrl: "", extraVnd: "" }] })}
+                  className={btnClass}
+                >
+                  + Thêm lựa chọn
                 </button>
               ) : null}
-            </div>
-
-            <div className="mt-2 grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className={labelClass}>Tên phân loại (vd: Trắng, Đen, Cao cấp) *</label>
-                <input value={r.label} onChange={(e) => setRow(i, { label: e.target.value })} className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>Màu (không bắt buộc)</label>
-                <div className="mt-1 flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={r.color || "#9ca3af"}
-                    onChange={(e) => setRow(i, { color: e.target.value })}
-                    className="h-9 w-14 cursor-pointer rounded border border-slate-300 bg-white p-1"
-                  />
-                  {r.color ? (
-                    <button type="button" onClick={() => setRow(i, { color: "" })} className="text-xs text-slate-500 hover:underline">
-                      Bỏ màu
-                    </button>
-                  ) : (
-                    <span className="text-xs text-slate-400">Chưa chọn — hiện dạng nút chữ</span>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className={labelClass}>Giá (VNĐ) *</label>
-                <input
-                  type="number"
-                  step="1000"
-                  min="0"
-                  inputMode="numeric"
-                  value={r.priceVnd}
-                  onChange={(e) => setRow(i, { priceVnd: e.target.value })}
-                  className={inputClass}
-                  placeholder="vd: 369000"
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Tồn kho *</label>
-                <input type="number" step="1" min="0" value={r.stockQty} onChange={(e) => setRow(i, { stockQty: e.target.value })} className={inputClass} />
-              </div>
-            </div>
-
-            <div className="mt-3">
-              <p className={labelClass}>Ảnh riêng (không bắt buộc, khách chọn sẽ thấy đổi ảnh)</p>
-              <div className="mt-1">
-                <ImageField value={r.imageUrl} onChange={(url) => setRow(i, { imageUrl: url })} onError={setUploadErr} height="h-14" />
-              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {rows.length < MAX_VALUES ? (
-        <button type="button" onClick={() => onChange([...rows, blankVariantRow()])} className={`${btnClass} px-4 py-2 font-semibold`}>
-          + Thêm phân loại
-        </button>
+      {groups.length < MAX_GROUPS ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {!groups.some((g) => g.name === "Màu sắc") ? (
+            <button type="button" onClick={() => addGroup("Màu sắc", "color")} className={`${btnClass} px-4 py-2 font-semibold`}>
+              + Thêm nhóm Màu sắc
+            </button>
+          ) : null}
+          {!groups.some((g) => g.name === "Loại") ? (
+            <button type="button" onClick={() => addGroup("Loại", "text")} className={`${btnClass} px-4 py-2 font-semibold`}>
+              + Thêm nhóm Loại / Phiên bản
+            </button>
+          ) : null}
+          <button type="button" onClick={() => addGroup("", "text")} className={`${btnClass} px-4 py-2 font-semibold`}>
+            + Nhóm khác
+          </button>
+        </div>
       ) : null}
     </div>
   );

@@ -1,9 +1,12 @@
-// Product options ("phân loại"): an optional flat list of choices such as colors or types.
-// Stored in Product.variants as JSON: [{ label, labelEn, labelEs, color, imageUrl, priceUsd, stockQty }] or null.
+// Product options ("variants"): up to 3 groups such as "Màu sắc" (color swatches) or "Loại / Phiên bản"
+// (text buttons). Stored in Product.variants as JSON:
+//   [{ name, nameEn, nameEs, type: "color" | "text",
+//      values: [{ label, labelEn, labelEs, color, imageUrl, extraUsd }] }]
 // Admins type Vietnamese only; English/Spanish are filled in automatically on save (see variantsServer.js).
-// Each option carries its own absolute price and stock — picking one replaces the product's base price/stock.
+// `extraUsd` is added to the product price when that value is picked.
 
-export const MAX_VALUES = 20;
+export const MAX_GROUPS = 3;
+export const MAX_VALUES = 12;
 
 const clip = (v, n) => String(v ?? "").trim().slice(0, n);
 const safeUrl = (v) => {
@@ -13,30 +16,36 @@ const safeUrl = (v) => {
 
 export function sanitizeVariants(input) {
   if (!Array.isArray(input)) return [];
-  const items = [];
-  for (const v of input.slice(0, MAX_VALUES)) {
-    const label = clip(v?.label, 60);
-    const price = Number(v?.priceUsd);
-    if (!label || !Number.isFinite(price) || price <= 0 || items.some((x) => x.label === label)) continue;
-    const stock = Math.max(0, Math.floor(Number(v?.stockQty) || 0));
-    items.push({
-      label,
-      labelEn: clip(v?.labelEn, 80),
-      labelEs: clip(v?.labelEs, 80),
-      color: /^#[0-9a-f]{6}$/i.test(v?.color ?? "") ? v.color : "",
-      imageUrl: safeUrl(v?.imageUrl),
-      priceUsd: Math.round(price * 1e6) / 1e6,
-      stockQty: stock,
-    });
+  const groups = [];
+  for (const g of input.slice(0, MAX_GROUPS)) {
+    const name = clip(g?.name, 40);
+    if (!name || groups.some((x) => x.name === name)) continue;
+    const type = g?.type === "color" ? "color" : "text";
+    const values = [];
+    for (const v of (Array.isArray(g?.values) ? g.values : []).slice(0, MAX_VALUES)) {
+      const label = clip(v?.label, 60);
+      if (!label || values.some((x) => x.label === label)) continue;
+      const extra = Number(v?.extraUsd);
+      values.push({
+        label,
+        labelEn: clip(v?.labelEn, 80),
+        labelEs: clip(v?.labelEs, 80),
+        color: type === "color" ? (/^#[0-9a-f]{6}$/i.test(v?.color ?? "") ? v.color : "#9ca3af") : "",
+        imageUrl: safeUrl(v?.imageUrl),
+        extraUsd: Number.isFinite(extra) ? Math.round(extra * 1e6) / 1e6 : 0,
+      });
+    }
+    if (values.length === 0) continue;
+    groups.push({ name, nameEn: clip(g?.nameEn, 60), nameEs: clip(g?.nameEs, 60), type, values });
   }
-  return items;
+  return groups;
 }
 
 export function hasVariants(product) {
   return Array.isArray(product?.variants) && product.variants.length > 0;
 }
 
-// Localized text for an item's "label" (or any {label,labelEn,labelEs}-shaped node).
+// Localized text for a group name ("name") or a value label ("label").
 export function variantText(node, base, locale) {
   const vi = node?.[base] ?? "";
   if (locale === "vi") return vi;
@@ -45,12 +54,27 @@ export function variantText(node, base, locale) {
   return en;
 }
 
-// Resolves the chosen option by its Vietnamese label. If the product has no options at all,
-// any input is accepted and `item` is null (the base price/stock applies).
-export function resolveSelection(variants, label) {
-  const items = Array.isArray(variants) ? variants : [];
-  if (items.length === 0) return { ok: true, item: null };
-  const item = items.find((v) => v.label === label);
-  if (!item) return { ok: false, error: "Vui lòng chọn một phân loại" };
-  return { ok: true, item };
+// Picks one value per group. `selection` is [{ group: <vi name>, value: <vi label> }].
+// Returns { ok, extraUsd, chosen: [{ group, value }] } or { ok: false, error }.
+export function resolveSelection(variants, selection) {
+  const groups = Array.isArray(variants) ? variants : [];
+  const chosen = [];
+  let extraUsd = 0;
+  for (const g of groups) {
+    const pick = (Array.isArray(selection) ? selection : []).find((o) => o?.group === g.name);
+    const value = g.values.find((v) => v.label === pick?.value);
+    if (!value) return { ok: false, error: `Vui lòng chọn "${g.name}"` };
+    chosen.push({ group: g, value });
+    extraUsd += value.extraUsd || 0;
+  }
+  return { ok: true, extraUsd, chosen };
+}
+
+export function selectionText(chosen, locale) {
+  return chosen.map((c) => `${variantText(c.group, "name", locale)}: ${variantText(c.value, "label", locale)}`).join(", ");
+}
+
+// Stable identity of a chosen combination (used for cart lines).
+export function selectionKey(chosen) {
+  return chosen.map((c) => `${c.group.name}=${c.value.label}`).join("|");
 }

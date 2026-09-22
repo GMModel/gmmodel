@@ -18,7 +18,7 @@ export default function ProductCard({ product, highlight = false, meta = null })
   const favorited = isWishlisted(product.id);
   const outOfStock = !product.isPreOrder && product.stockQty <= 0;
   const withOptions = hasVariants(product);
-  const swatches = withOptions ? product.variants.filter((v) => v.color).slice(0, 6) : [];
+  const swatches = withOptions ? (product.variants.find((g) => g.type === "color")?.values ?? []).slice(0, 6) : [];
 
   function handleAddToCart() {
     addItem(product);

@@ -8,8 +8,6 @@ import { BODY_STYLES } from "@/lib/bodyStyles";
 import { usdToVnd, vndToUsd } from "@/lib/money";
 import VariantsEditor, { toFormVariants, fromFormVariants } from "@/components/admin/VariantsEditor";
 
-const REQUIRE_VARIANT_PRICE = "Mỗi phân loại cần nhập giá lớn hơn 0.";
-
 const CATEGORIES = [
   { value: "car", label: "Xe mô hình" },
   { value: "accessory", label: "Phụ kiện" },
@@ -44,7 +42,6 @@ export default function ProductForm({ product }) {
     isNewArrival: product?.isNewArrival ?? false,
     isPreOrder: product?.isPreOrder ?? false,
     isBestSeller: product?.isBestSeller ?? false,
-    variantsEnabled: Boolean(product?.variants?.length),
     variants: toFormVariants(product?.variants),
   });
   const [uploading, setUploading] = useState(false);
@@ -100,29 +97,11 @@ export default function ProductForm({ product }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-
-    const variantsPayload = form.variantsEnabled ? fromFormVariants(form.variants) : null;
-    if (form.variantsEnabled) {
-      if (!variantsPayload || variantsPayload.length === 0) {
-        setError("Vui lòng nhập ít nhất một phân loại (hoặc tắt công tắc phân loại).");
-        return;
-      }
-      if (variantsPayload.some((v) => !(v.priceUsd > 0))) {
-        setError(REQUIRE_VARIANT_PRICE);
-        return;
-      }
-    }
-
     setSaving(true);
+    setError("");
 
     const url = isEdit ? `/api/admin/products/${product.id}` : "/api/admin/products";
     const method = isEdit ? "PATCH" : "POST";
-
-    // When variants are enabled, the general price/stock fields are hidden — the product's
-    // "headline" price/stock (used on cards, in search, etc.) is derived from the first option.
-    const priceUsd = form.variantsEnabled ? variantsPayload[0].priceUsd : vndToUsd(form.priceVnd);
-    const stockQty = form.variantsEnabled ? variantsPayload.reduce((sum, v) => sum + v.stockQty, 0) : form.stockQty;
 
     try {
       const res = await fetch(url, {
@@ -130,10 +109,9 @@ export default function ProductForm({ product }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          priceUsd,
-          stockQty,
-          compareAtUsd: form.variantsEnabled ? "" : form.compareAtVnd ? vndToUsd(form.compareAtVnd) : "",
-          variants: variantsPayload,
+          priceUsd: vndToUsd(form.priceVnd),
+          compareAtUsd: form.compareAtVnd ? vndToUsd(form.compareAtVnd) : "",
+          variants: fromFormVariants(form.variants),
         }),
       });
       const data = await res.json();
@@ -243,53 +221,40 @@ export default function ProductForm({ product }) {
       </div>
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <h2 className="text-sm font-bold text-slate-900">Giá, tồn kho &amp; phân loại</h2>
-
-        <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            checked={form.variantsEnabled}
-            onChange={(e) => update("variantsEnabled", e.target.checked)}
-            className="mt-0.5"
-          />
-          Sản phẩm này có nhiều phân loại (màu sắc / loại), mỗi phân loại giá và tồn kho riêng
-        </label>
-
-        {!form.variantsEnabled ? (
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className={labelClass}>Giá bán (VNĐ) *</label>
-              <input required type="number" step="1000" min="0" inputMode="numeric" value={form.priceVnd} onChange={(e) => update("priceVnd", e.target.value)} className={inputClass} placeholder="vd: 369000" />
-              {Number(form.priceVnd) > 0 ? (
-                <p className="mt-1 text-xs text-slate-400">
-                  Hiển thị {Number(form.priceVnd).toLocaleString("vi-VN")}₫ cho khách chọn tiếng Việt, ≈ ${vndToUsd(form.priceVnd).toFixed(2)} cho English / Español.
-                </p>
-              ) : null}
-            </div>
-            <div>
-              <label className={labelClass}>Giá gốc (VNĐ) — để trống nếu không giảm giá</label>
-              <input type="number" step="1000" min="0" inputMode="numeric" value={form.compareAtVnd} onChange={(e) => update("compareAtVnd", e.target.value)} className={inputClass} placeholder="vd: 539000" />
-            </div>
-            <div>
-              <label className={labelClass}>Số lượng tồn kho</label>
-              <input
-                type="number"
-                step="1"
-                min="0"
-                value={form.stockQty}
-                onChange={(e) => update("stockQty", e.target.value)}
-                className={inputClass}
-                disabled={form.isPreOrder}
-              />
-              {form.isPreOrder ? (
-                <p className="mt-1 text-xs text-slate-400">Sản phẩm đặt trước không giới hạn tồn kho.</p>
-              ) : null}
-            </div>
+        <h2 className="text-sm font-bold text-slate-900">Giá &amp; Tồn kho</h2>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelClass}>Giá bán (VNĐ) *</label>
+            <input required type="number" step="1000" min="0" inputMode="numeric" value={form.priceVnd} onChange={(e) => update("priceVnd", e.target.value)} className={inputClass} placeholder="vd: 369000" />
+            {Number(form.priceVnd) > 0 ? (
+              <p className="mt-1 text-xs text-slate-400">
+                Hiển thị {Number(form.priceVnd).toLocaleString("vi-VN")}₫ cho khách chọn tiếng Việt, ≈ ${vndToUsd(form.priceVnd).toFixed(2)} cho English / Español.
+              </p>
+            ) : null}
           </div>
-        ) : (
-          <VariantsEditor rows={form.variants} onChange={(variants) => update("variants", variants)} />
-        )}
+          <div>
+            <label className={labelClass}>Giá gốc (VNĐ) — để trống nếu không giảm giá</label>
+            <input type="number" step="1000" min="0" inputMode="numeric" value={form.compareAtVnd} onChange={(e) => update("compareAtVnd", e.target.value)} className={inputClass} placeholder="vd: 539000" />
+          </div>
+          <div>
+            <label className={labelClass}>Số lượng tồn kho</label>
+            <input
+              type="number"
+              step="1"
+              min="0"
+              value={form.stockQty}
+              onChange={(e) => update("stockQty", e.target.value)}
+              className={inputClass}
+              disabled={form.isPreOrder}
+            />
+            {form.isPreOrder ? (
+              <p className="mt-1 text-xs text-slate-400">Sản phẩm đặt trước không giới hạn tồn kho.</p>
+            ) : null}
+          </div>
+        </div>
       </div>
+
+      <VariantsEditor groups={form.variants} onChange={(variants) => update("variants", variants)} />
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-sm font-bold text-slate-900">Ảnh đại diện</h2>
