@@ -20,12 +20,13 @@ export default function ProductDetailClient({ params }) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [product, setProduct] = useState(undefined);
   const [added, setAdded] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [activeImage, setActiveImage] = useState(""); // gallery thumbnail the customer clicked
   const [picked, setPicked] = useState({}); // { <group name>: <value label> }
 
   useEffect(() => {
     setProduct(undefined);
     setPicked({});
+    setActiveImage("");
     fetch(`/api/products/${slug}`)
       .then((res) => (res.ok ? res.json() : null))
       .then(setProduct)
@@ -80,6 +81,10 @@ export default function ProductDetailClient({ params }) {
   const optionImage = selection.ok ? [...selection.chosen].reverse().find((c) => c.value.imageUrl)?.value.imageUrl : "";
   const unitPriceUsd = product.priceUsd + extraUsd;
 
+  // Main image: a clicked thumbnail wins, else the chosen option's own image, else the product image.
+  const shownImage = activeImage || optionImage || product.imageUrl;
+  const thumbnails = [...new Set([optionImage || product.imageUrl, ...(product.galleryUrls ?? [])].filter(Boolean))];
+
   function handleAddToCart() {
     const variant = groups.length && selection.ok
       ? {
@@ -119,23 +124,13 @@ export default function ProductDetailClient({ params }) {
           <div className="mt-4 grid grid-cols-1 gap-8 md:grid-cols-2">
             <div>
               <div className="relative overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
-                {showVideo && product.videoUrl ? (
-                  <video
-                    src={product.videoUrl}
-                    className="h-80 w-full object-contain md:h-[420px]"
-                    autoPlay
-                    controls
-                    playsInline
-                  />
-                ) : (
-                  <ModelThumb
-                    color={product.imageColor}
-                    src={optionImage || product.imageUrl}
-                    alt={name}
-                    scaleLabel={product.scale?.label}
-                    className="h-80 w-full md:h-[420px]"
-                  />
-                )}
+                <ModelThumb
+                  color={product.imageColor}
+                  src={shownImage}
+                  alt={name}
+                  scaleLabel={product.scale?.label}
+                  className="h-80 w-full md:h-[420px]"
+                />
                 {product.badge ? (
                   <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-1 text-xs font-bold">{product.badge}</span>
                 ) : null}
@@ -152,35 +147,22 @@ export default function ProductDetailClient({ params }) {
                 </button>
               </div>
 
-              {product.videoUrl || product.galleryUrls?.length ? (
+              {thumbnails.length > 1 ? (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {product.videoUrl ? (
+                  {thumbnails.map((url, i) => (
                     <button
+                      key={`${url}-${i}`}
                       type="button"
-                      onClick={() => setShowVideo(true)}
-                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded border bg-neutral-950 ${
-                        showVideo ? "border-red-500" : "border-white/10"
+                      aria-label={`${name} ${i + 1}`}
+                      aria-pressed={url === shownImage}
+                      onClick={() => setActiveImage(url)}
+                      className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded border bg-neutral-950 ${
+                        url === shownImage ? "border-red-500" : "border-white/10 hover:border-white/40"
                       }`}
                     >
-                      <video src={product.videoUrl} className="h-full w-full object-contain" muted />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/40">
-                        <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" loading="lazy" className="h-full w-full object-contain" />
                     </button>
-                  ) : null}
-                  {product.galleryUrls?.map((url, i) => (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      key={i}
-                      src={url}
-                      alt={`${name} ${i + 2}`}
-                      onClick={() => setShowVideo(false)}
-                      className={`h-16 w-16 flex-shrink-0 cursor-pointer rounded border bg-neutral-950 object-contain ${
-                        !showVideo ? "border-red-500" : "border-white/10"
-                      }`}
-                    />
                   ))}
                 </div>
               ) : null}
@@ -221,7 +203,10 @@ export default function ProductDetailClient({ params }) {
                             title={label}
                             aria-label={label}
                             aria-pressed={active}
-                            onClick={() => setPicked((p) => ({ ...p, [g.name]: v.label }))}
+                            onClick={() => {
+                              setPicked((p) => ({ ...p, [g.name]: v.label }));
+                              setActiveImage("");
+                            }}
                             className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-red-500 ring-2 ring-red-500/40" : "border-white/30 hover:border-white"}`}
                             style={{ backgroundColor: v.color }}
                           />
@@ -230,7 +215,10 @@ export default function ProductDetailClient({ params }) {
                             key={v.label}
                             type="button"
                             aria-pressed={active}
-                            onClick={() => setPicked((p) => ({ ...p, [g.name]: v.label }))}
+                            onClick={() => {
+                              setPicked((p) => ({ ...p, [g.name]: v.label }));
+                              setActiveImage("");
+                            }}
                             className={`rounded border px-3 py-2 text-sm font-medium transition ${active ? "border-red-500 bg-red-600/20 text-white" : "border-white/30 text-white/80 hover:border-white"}`}
                           >
                             {label}

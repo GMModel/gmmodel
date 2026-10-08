@@ -18,8 +18,8 @@ export async function POST(request) {
       body,
       request,
       onBeforeGenerateToken: async () => ({
-        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm", "video/quicktime"],
-        maximumSizeInBytes: 500 * 1024 * 1024,
+        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+        maximumSizeInBytes: 20 * 1024 * 1024,
         addRandomSuffix: true,
       }),
     });

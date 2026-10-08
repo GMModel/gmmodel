@@ -35,7 +35,6 @@ export default function ProductForm({ product }) {
     compareAtVnd: product?.compareAtUsd ? usdToVnd(product.compareAtUsd) : "",
     stockQty: product?.stockQty ?? 20,
     imageUrl: product?.imageUrl ?? "",
-    videoUrl: product?.videoUrl ?? "",
     galleryUrls: product?.galleryUrls ?? [],
     imageColor: product?.imageColor ?? "#6b7280",
     badge: product?.badge ?? "",
@@ -83,7 +82,6 @@ export default function ProductForm({ product }) {
   }
 
   const handleUpload = (files) => runUpload(async () => update("imageUrl", await uploadMedia(files[0], setUploadProgress)));
-  const handleVideoUpload = (files) => runUpload(async () => update("videoUrl", await uploadMedia(files[0], setUploadProgress)));
   const handleGalleryUpload = (files) =>
     runUpload(async () => {
       const urls = [];
@@ -281,41 +279,6 @@ export default function ProductForm({ product }) {
               <label className={labelClass}>Màu nền dự phòng (khi chưa có ảnh)</label>
               <input type="color" value={form.imageColor} onChange={(e) => update("imageColor", e.target.value)} className="mt-1 h-9 w-16 cursor-pointer rounded border border-slate-300" />
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <h2 className="text-sm font-bold text-slate-900">Video sản phẩm</h2>
-        <p className="mt-1 text-xs text-slate-400">Video sẽ hiển thị đầu tiên ở trang chi tiết sản phẩm và tự động phát khi khách bấm vào.</p>
-        <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row">
-          <div className="flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-            {form.videoUrl ? (
-              <video src={form.videoUrl} className="h-full w-full object-contain" muted />
-            ) : (
-              <span className="text-xs text-slate-400">Chưa có video</span>
-            )}
-          </div>
-          <div className="w-full min-w-0 flex-1">
-            <FilePickButton accept="video/mp4,video/webm,video/quicktime,video/*" disabled={uploading} onFiles={handleVideoUpload}>
-              Chọn video từ thư viện
-            </FilePickButton>
-            {uploading ? <p className="mt-2 text-xs text-slate-500">{uploadProgress > 0 ? `Đang tải lên ${uploadProgress}%…` : "Đang tải lên, vui lòng đợi…"}</p> : null}
-            {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
-            <p className="mt-1 text-xs text-slate-400">MP4 (H.264) là tốt nhất, cũng nhận WEBM/MOV, tối đa 500MB. Video nhẹ (dưới khoảng 50MB) sẽ tải nhanh hơn cho khách xem.</p>
-            <div className="mt-3">
-              <label className={labelClass}>Hoặc dán URL video</label>
-              <input value={form.videoUrl} onChange={(e) => update("videoUrl", e.target.value)} className={inputClass} placeholder="https://..." />
-            </div>
-            {form.videoUrl ? (
-              <button
-                type="button"
-                onClick={() => update("videoUrl", "")}
-                className="mt-3 text-xs font-semibold text-red-600 hover:underline"
-              >
-                Xoá video
-              </button>
-            ) : null}
           </div>
         </div>
       </div>

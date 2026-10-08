@@ -5,11 +5,9 @@ import { upload } from "@vercel/blob/client";
 // Browser-side media upload for the admin:
 //  - photos from a phone are shrunk/converted first (HEIC → JPEG, max 2000px), so they are small and always an allowed type
 //  - the file then goes straight to Vercel Blob with a short-lived token from /api/admin/upload-token,
-//    which avoids the 4.5MB request limit of serverless functions (large photos and videos work)
+//    which avoids the 4.5MB request limit of serverless functions (large photos work)
 
 const MAX_SIDE = 2000;
-const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
-const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime"];
 
 async function decode(file) {
   if (typeof createImageBitmap === "function") {
@@ -70,19 +68,13 @@ export async function prepareImage(file) {
   return new File([blob], `${(file.name || "image").replace(/\.[^.]+$/, "")}.${ext}`, { type: outType });
 }
 
-export function isVideoFile(file) {
-  return ALLOWED_VIDEO.includes(file.type) || /\.(mp4|webm|mov)$/i.test(file.name || "");
-}
-
-// Uploads an image or video and returns its public URL. Throws an Error with a Vietnamese message.
+// Uploads an image and returns its public URL. Throws an Error with a Vietnamese message.
 export async function uploadMedia(file, onProgress) {
   let toSend = file;
-  if (isVideoFile(file)) {
-    if (file.size > MAX_VIDEO_BYTES) throw new Error("Video vượt quá 500MB. Hãy nén video nhỏ lại (ví dụ 720p) rồi thử lại.");
-  } else if (file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || "")) {
+  if (file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || "")) {
     toSend = await prepareImage(file);
   } else {
-    throw new Error("Chỉ hỗ trợ ảnh (JPG, PNG, WEBP, GIF) hoặc video (MP4, WEBM, MOV).");
+    throw new Error("Chỉ hỗ trợ ảnh (JPG, PNG, WEBP, GIF).");
   }
 
   const safeName = (toSend.name || "file").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-60);
