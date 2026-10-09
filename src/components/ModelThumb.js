@@ -1,10 +1,12 @@
-export default function ModelThumb({ color = "#6b7280", scaleLabel, className = "", src, alt, priority = false }) {
+import { imageAtWidth } from "@/lib/imageUrl";
+
+export default function ModelThumb({ color = "#6b7280", scaleLabel, className = "", src, alt, priority = false, width = 800 }) {
   if (src) {
     return (
       <div className={`relative overflow-hidden bg-neutral-100 ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={imageAtWidth(src, width)}
           alt={alt ?? ""}
           loading={priority ? "eager" : "lazy"}
           decoding="async"

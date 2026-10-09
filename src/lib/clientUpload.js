@@ -1,11 +1,11 @@
 "use client";
 
-import { upload } from "@vercel/blob/client";
+import { CLOUDINARY_CLOUD, CLOUDINARY_PRESET } from "@/lib/imageUrl";
 
 // Browser-side media upload for the admin:
 //  - photos from a phone are shrunk/converted first (HEIC → JPEG, max 2000px), so they are small and always an allowed type
-//  - the file then goes straight to Vercel Blob with a short-lived token from /api/admin/upload-token,
-//    which avoids the 4.5MB request limit of serverless functions (large photos work)
+//  - the file then goes straight from the browser to Cloudinary (unsigned upload preset), so it never
+//    passes through the server and the serverless request-size limit does not apply
 
 const MAX_SIDE = 2000;
 
@@ -77,20 +77,35 @@ export async function uploadMedia(file, onProgress) {
     throw new Error("Chỉ hỗ trợ ảnh (JPG, PNG, WEBP, GIF).");
   }
 
-  const safeName = (toSend.name || "file").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-60);
-  try {
-    const blob = await upload(`products/${Date.now()}-${safeName}`, toSend, {
-      access: "public",
-      handleUploadUrl: "/api/admin/upload-token",
-      contentType: toSend.type || undefined,
-      // Big files are split into parts, uploaded in parallel and retried automatically.
-      multipart: toSend.size > 20 * 1024 * 1024,
-      onUploadProgress: (e) => onProgress?.(Math.round(e.percentage)),
-    });
-    return blob.url;
-  } catch (err) {
-    const msg = String(err?.message || "");
-    if (/forbidden|401|403/i.test(msg)) throw new Error("Bạn cần đăng nhập lại (phiên admin đã hết hạn).");
-    throw new Error(`Tải lên thất bại${msg ? `: ${msg}` : ""}`);
-  }
+  const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`;
+  const form = new FormData();
+  form.append("file", toSend);
+  form.append("upload_preset", CLOUDINARY_PRESET);
+
+  // XMLHttpRequest (not fetch) so we can report upload progress.
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onerror = () => reject(new Error("Tải lên thất bại: lỗi kết nối mạng, vui lòng thử lại."));
+    xhr.ontimeout = () => reject(new Error("Tải lên thất bại: quá thời gian chờ, vui lòng thử lại."));
+    xhr.onload = () => {
+      let data = null;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {
+        // not JSON
+      }
+      if (xhr.status >= 200 && xhr.status < 300 && data?.secure_url) {
+        resolve(data.secure_url);
+        return;
+      }
+      const msg = data?.error?.message ? `: ${data.error.message}` : `: mã lỗi ${xhr.status}`;
+      reject(new Error(`Tải lên thất bại${msg}`));
+    };
+    xhr.timeout = 120000;
+    xhr.send(form);
+  });
 }

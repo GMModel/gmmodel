@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 import ModelThumb from "@/components/ModelThumb";
+import { imageAtWidth } from "@/lib/imageUrl";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 import { pickLabel, pickProductName, pickProductDescription } from "@/lib/i18n";
 
@@ -127,6 +128,8 @@ export default function ProductDetailClient({ params }) {
                 <ModelThumb
                   color={product.imageColor}
                   src={shownImage}
+                  width={1200}
+                  priority
                   alt={name}
                   scaleLabel={product.scale?.label}
                   className="h-80 w-full md:h-[420px]"
@@ -161,7 +164,7 @@ export default function ProductDetailClient({ params }) {
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt="" loading="lazy" className="h-full w-full object-contain" />
+                      <img src={imageAtWidth(url, 160)} alt="" loading="lazy" className="h-full w-full object-contain" />
                     </button>
                   ))}
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { imageAtWidth } from "@/lib/imageUrl";
 import { formatVnd } from "@/lib/money";
 import Link from "next/link";
 
@@ -26,7 +27,7 @@ function MobileProductCard({ p, onDelete, deleting }) {
         >
           {p.imageUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={p.imageUrl} alt="" className="h-full w-full object-contain" />
+            <img src={imageAtWidth(p.imageUrl, 160)} alt="" className="h-full w-full object-contain" />
           ) : null}
         </div>
         <div className="min-w-0 flex-1">
@@ -217,7 +218,7 @@ export default function AdminProductsPage() {
                     >
                       {p.imageUrl ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={p.imageUrl} alt="" className="h-full w-full object-contain" />
+                        <img src={imageAtWidth(p.imageUrl, 160)} alt="" className="h-full w-full object-contain" />
                       ) : null}
                     </div>
                   </td>

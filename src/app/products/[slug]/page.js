@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { imageAtWidth } from "@/lib/imageUrl";
 import ProductDetailClient from "./ProductDetailClient";
 
 export async function generateMetadata({ params }) {
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      images: product.imageUrl ? [{ url: product.imageUrl }] : undefined,
+      images: product.imageUrl ? [{ url: imageAtWidth(product.imageUrl, 1200) }] : undefined,
     },
   };
 }
