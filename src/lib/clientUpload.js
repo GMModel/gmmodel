@@ -69,10 +69,10 @@ export async function prepareImage(file) {
 }
 
 // Uploads an image and returns its public URL. Throws an Error with a Vietnamese message.
-export async function uploadMedia(file, onProgress) {
+export async function uploadMedia(file, onProgress, { skipPrepare = false } = {}) {
   let toSend = file;
   if (file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || "")) {
-    toSend = await prepareImage(file);
+    toSend = skipPrepare ? file : await prepareImage(file);
   } else {
     throw new Error("Chỉ hỗ trợ ảnh (JPG, PNG, WEBP, GIF).");
   }

@@ -1,6 +1,6 @@
 import { imageAtWidth } from "@/lib/imageUrl";
 
-export default function ModelThumb({ color = "#6b7280", scaleLabel, className = "", src, alt, priority = false, width = 800 }) {
+export default function ModelThumb({ color = "#6b7280", scaleLabel, className = "", src, alt, priority = false, width = 800, fit = "contain" }) {
   if (src) {
     return (
       <div className={`relative overflow-hidden bg-neutral-100 ${className}`}>
@@ -10,7 +10,7 @@ export default function ModelThumb({ color = "#6b7280", scaleLabel, className = 
           alt={alt ?? ""}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
-          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
+          className={`h-full w-full ${fit === "cover" ? "object-cover" : "object-contain"} transition-transform duration-300 group-hover:scale-110`}
         />
         {scaleLabel ? (
           <span className="absolute bottom-2 right-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white/80">

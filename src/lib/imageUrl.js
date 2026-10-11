@@ -16,3 +16,6 @@ export function imageAtWidth(url, width = 800) {
   if (/^[a-z]{1,3}_[^/]*\//.test(rest)) return url;
   return `${url.slice(0, i + MARKER.length)}w_${width},c_limit,f_auto,q_auto/${rest}`;
 }
+
+// Homepage banner frame (width / height). The admin crops banners to this shape and the Hero uses it.
+export const BANNER_ASPECT = 16 / 9;

@@ -37,7 +37,8 @@ export default function Hero() {
       src={current.imageUrl}
       alt={current.alt || "GM Model"}
       priority
-      className="h-56 w-full md:h-72"
+      fit="cover"
+      className="aspect-video w-full"
     />
   );
 
