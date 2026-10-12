@@ -14,14 +14,15 @@ import {
   saveSite,
 } from "@/components/admin/fields";
 
-// Homepage category tiles are wide strips; the grid fills each frame with the photo (centre-cropped on phones).
-const TILE_CROP = { aspect: 2, outWidth: 1200, title: "Chọn vùng ảnh cho ô danh mục (khung 2:1)" };
+// Frames on the homepage (same shape on phones and desktop, see CategoryGrid): tiles are 8:5, brand strips 3:1.
+const TILE_CROP = { aspect: 8 / 5, outWidth: 1200, title: "Chọn vùng ảnh cho ô danh mục (khung 8:5)" };
+const BRAND_CROP = { aspect: 3, outWidth: 1200, title: "Chọn vùng ảnh cho ô hãng (khung 3:1)" };
 
-function TileEditor({ tile, onChange, onError, actions, showTag }) {
+function TileEditor({ tile, onChange, onError, actions, showTag, crop = TILE_CROP }) {
   return (
     <div className="space-y-3 rounded-xl border border-slate-200 p-4">
       <div className="flex items-start justify-between gap-3">
-        <ImageField value={tile.imageUrl} onChange={(imageUrl) => onChange({ ...tile, imageUrl })} onError={onError} crop={TILE_CROP} />
+        <ImageField value={tile.imageUrl} onChange={(imageUrl) => onChange({ ...tile, imageUrl })} onError={onError} crop={crop} />
         {actions}
       </div>
       <LocalizedInput label="Tên hiển thị (VN / US / ES)" value={tile.label} onChange={(label) => onChange({ ...tile, label })} />
@@ -34,7 +35,7 @@ function TileEditor({ tile, onChange, onError, actions, showTag }) {
   );
 }
 
-function TileList({ title, hint, items, onChange, onError }) {
+function TileList({ title, hint, items, onChange, onError, crop }) {
   const blank = { label: { vi: "", en: "", es: "" }, imageUrl: "", link: "", color: "#374151" };
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -52,6 +53,7 @@ function TileList({ title, hint, items, onChange, onError }) {
           <TileEditor
             key={i}
             tile={tile}
+            crop={crop}
             onError={onError}
             onChange={(next) => onChange(items.map((t, j) => (j === i ? next : t)))}
             actions={
@@ -152,6 +154,7 @@ export default function TilesTab() {
           <TileList
             title="Ô hãng"
             hint="Hàng ô hãng phía dưới (hiện trên máy tính)."
+            crop={BRAND_CROP}
             items={data.brandTiles}
             onError={onError}
             onChange={(brandTiles) => setData({ ...data, brandTiles })}

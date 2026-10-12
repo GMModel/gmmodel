@@ -70,14 +70,34 @@ export function ImageField({ value, onChange, onError, height = "h-20", crop }) 
     }
   }
 
+  // Re-open the crop dialog on the photo that is already saved (no need to pick the file again).
+  async function readjust() {
+    setUploading(true);
+    try {
+      const res = await fetch(value);
+      if (!res.ok) throw new Error("fetch");
+      const blob = await res.blob();
+      flow.start([new File([blob], "anh.jpg", { type: blob.type || "image/jpeg" })], onChange);
+    } catch {
+      onError?.("Không mở lại được ảnh cũ. Hãy bấm \"Đổi ảnh\" để chọn lại từ thư viện.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  // With a fixed crop frame, the preview shows the frame exactly as the shop will (no empty bands).
+  const exact = crop && !crop.allowFit;
+  const frame = exact ? { aspectRatio: crop.aspect } : undefined;
+  const previewClass = exact ? "w-36 object-cover" : `${height} w-28 object-contain`;
+
   return (
     <div className="flex items-center gap-3">
       {crop ? flow.dialog : null}
       {value ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={value} alt="" className={`${height} w-28 rounded-lg bg-slate-100 object-contain`} />
+        <img src={value} alt="" style={frame} className={`${previewClass} rounded-lg bg-slate-100`} />
       ) : (
-        <div className={`${height} flex w-28 items-center justify-center rounded-lg border border-dashed border-slate-300 text-xs text-slate-400`}>
+        <div style={frame} className={`${exact ? "w-36" : `${height} w-28`} flex items-center justify-center rounded-lg border border-dashed border-slate-300 text-xs text-slate-400`}>
           Chưa có ảnh
         </div>
       )}
@@ -86,6 +106,11 @@ export function ImageField({ value, onChange, onError, height = "h-20", crop }) 
           {uploading ? "Đang tải…" : value ? "Đổi ảnh" : "Tải ảnh lên"}
           <input type="file" accept="image/*" onChange={handleFile} className="hidden" />
         </label>
+        {value && crop && (
+          <button type="button" onClick={readjust} disabled={uploading} className={btnClass}>
+            Chỉnh vị trí
+          </button>
+        )}
         {value && (
           <button type="button" onClick={() => onChange("")} className={`${btnClass} text-red-600`}>
             Xoá
