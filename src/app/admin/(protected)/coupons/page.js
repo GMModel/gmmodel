@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatVnd, vndToUsd } from "@/lib/money";
 
 const inputClass = "rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900";
 
 function formatValue(c) {
-  return c.type === "percent" ? `-${c.value}%` : `-$${c.value.toFixed(2)}`;
+  return c.type === "percent" ? `-${c.value}%` : `-${formatVnd(c.value)}`;
 }
 
 export default function AdminCouponsPage() {
@@ -40,7 +41,12 @@ export default function AdminCouponsPage() {
       const res = await fetch("/api/admin/coupons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        // The admin types VND; coupons are stored in USD like product prices.
+        body: JSON.stringify({
+          ...form,
+          value: form.type === "fixed" ? vndToUsd(form.value) : form.value,
+          minOrderUsd: form.minOrderUsd ? vndToUsd(form.minOrderUsd) : "",
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Có lỗi xảy ra");
@@ -85,19 +91,20 @@ export default function AdminCouponsPage() {
             <label className="text-xs font-semibold text-slate-600">Loại</label>
             <select value={form.type} onChange={(e) => update("type", e.target.value)} className={`mt-1 w-full ${inputClass}`}>
               <option value="percent">Phần trăm (%)</option>
-              <option value="fixed">Số tiền cố định (USD)</option>
+              <option value="fixed">Số tiền cố định (₫)</option>
             </select>
           </div>
           <div>
             <label className="text-xs font-semibold text-slate-600">
-              Giá trị {form.type === "percent" ? "(%)" : "(USD)"}
+              Giá trị {form.type === "percent" ? "(%)" : "(₫)"}
             </label>
             <input
               required
               type="number"
-              step="0.01"
+              step={form.type === "percent" ? "0.01" : "1000"}
               min="0"
               max={form.type === "percent" ? 100 : undefined}
+              placeholder={form.type === "percent" ? "10" : "50000"}
               value={form.value}
               onChange={(e) => update("value", e.target.value)}
               className={`mt-1 w-full ${inputClass}`}
@@ -108,8 +115,8 @@ export default function AdminCouponsPage() {
             <input type="number" min="1" value={form.maxUses} onChange={(e) => update("maxUses", e.target.value)} className={`mt-1 w-full ${inputClass}`} />
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600">Đơn tối thiểu (USD) — để trống = không yêu cầu</label>
-            <input type="number" step="0.01" min="0" value={form.minOrderUsd} onChange={(e) => update("minOrderUsd", e.target.value)} className={`mt-1 w-full ${inputClass}`} />
+            <label className="text-xs font-semibold text-slate-600">Đơn tối thiểu (₫) — để trống = không yêu cầu</label>
+            <input type="number" step="1000" min="0" placeholder="500000" value={form.minOrderUsd} onChange={(e) => update("minOrderUsd", e.target.value)} className={`mt-1 w-full ${inputClass}`} />
           </div>
           <div>
             <label className="text-xs font-semibold text-slate-600">Ngày hết hạn — để trống = không hết hạn</label>
@@ -154,7 +161,7 @@ export default function AdminCouponsPage() {
                     {c.usedCount}
                     {c.maxUses ? ` / ${c.maxUses}` : ""}
                   </td>
-                  <td className="px-3 py-3 sm:px-5 text-slate-600">{c.minOrderUsd ? `$${c.minOrderUsd.toFixed(2)}` : "—"}</td>
+                  <td className="px-3 py-3 sm:px-5 text-slate-600">{c.minOrderUsd ? formatVnd(c.minOrderUsd) : "—"}</td>
                   <td className="px-3 py-3 sm:px-5 text-slate-600">
                     {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString("vi-VN") : "—"}
                   </td>
