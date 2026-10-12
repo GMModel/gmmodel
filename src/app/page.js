@@ -10,11 +10,12 @@ import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 
 export default async function Home() {
+  // 12 models: the ones flagged "new arrival" first, then the most recently added to fill the grid.
   const newArrivals = await prisma.product.findMany({
-    where: { isNewArrival: true, category: "car" },
+    where: { category: "car" },
     include: { brand: true, scale: true },
-    orderBy: { createdAt: "desc" },
-    take: 8,
+    orderBy: [{ isNewArrival: "desc" }, { createdAt: "desc" }],
+    take: 12,
   });
 
   return (
