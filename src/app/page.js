@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoryGrid from "@/components/CategoryGrid";
 import PerksBar from "@/components/PerksBar";
-import PreOrderSection from "@/components/PreOrderSection";
 import ProductSection from "@/components/ProductSection";
 import TrustBadges from "@/components/TrustBadges";
 import FaqSection from "@/components/FaqSection";
@@ -11,19 +10,12 @@ import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 
 export default async function Home() {
-  const [newArrivals, preorders] = await Promise.all([
-    prisma.product.findMany({
-      where: { isNewArrival: true, category: "car" },
-      include: { brand: true, scale: true },
-      orderBy: { createdAt: "desc" },
-      take: 8,
-    }),
-    prisma.product.findMany({
-      where: { isPreOrder: true, category: "car" },
-      include: { brand: true, scale: true },
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+  const newArrivals = await prisma.product.findMany({
+    where: { isNewArrival: true, category: "car" },
+    include: { brand: true, scale: true },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
 
   return (
     <>
@@ -32,7 +24,6 @@ export default async function Home() {
         <Hero />
         <CategoryGrid />
         <PerksBar />
-        <PreOrderSection initialProducts={preorders} />
         <ProductSection initialProducts={newArrivals} />
         <TrustBadges />
         <FaqSection />

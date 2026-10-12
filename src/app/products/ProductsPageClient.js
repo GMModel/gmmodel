@@ -14,7 +14,7 @@ import { pickLabel } from "@/lib/i18n";
 const PAGE_SIZE = 12;
 
 export default function ProductsPageClient() {
-  const { t, locale, brandList, scales, countryGroups, scaleLabel } = useStore();
+  const { t, locale, scales, countryGroups, scaleLabel } = useStore();
   const TAB_KEYS = ["all", "new", "preorder", "bestseller", "sale", ...scales.map((s) => s.slug)];
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -148,20 +148,10 @@ export default function ProductsPageClient() {
                 ))}
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button onClick={() => goTo({ brand: null })} className={chipClass(!activeBrand)}>
-                  {t.productSection.brandFilterLabel}
-                </button>
-                {brandList.map((b) => (
-                  <button key={b.slug} onClick={() => goTo({ brand: b.slug })} className={chipClass(activeBrand === b.slug)}>
-                    {b.label}
-                  </button>
-                ))}
-              </div>
-
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">{t.productSection.carBrandFilterLabel}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button onClick={() => goTo({ country: null })} className={chipClass(!activeCountry)}>
-                  {t.productSection.carBrandFilterLabel}
+                  {t.productSection.tabs.all}
                 </button>
                 {countryGroups.map((group) => (
                   <button key={group.slug} onClick={() => goTo({ country: group.slug })} className={chipClass(activeCountry === group.slug)}>
@@ -170,9 +160,10 @@ export default function ProductsPageClient() {
                 ))}
               </div>
 
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">{t.nav.usedModels}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button onClick={() => goTo({ bodyStyle: null })} className={chipClass(!activeBodyStyle)}>
-                  {t.nav.usedModels}
+                  {t.productSection.tabs.all}
                 </button>
                 {BODY_STYLES.map((style) => (
                   <button key={style.slug} onClick={() => goTo({ bodyStyle: style.slug })} className={chipClass(activeBodyStyle === style.slug)}>
