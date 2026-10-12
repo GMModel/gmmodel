@@ -52,6 +52,8 @@ export default function Header() {
   function handleSearchSubmit(e) {
     e.preventDefault();
     const query = search.trim();
+    document.activeElement?.blur?.(); // close the phone keyboard so the results are visible
+    setMobileNavOpen(false);
     router.push(query ? `/products?q=${encodeURIComponent(query)}` : "/products");
   }
 
@@ -116,9 +118,12 @@ export default function Header() {
               </svg>
             </button>
             <input
+              type="search"
+              enterKeyHint="search"
+              autoComplete="off"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="ml-2 w-full bg-transparent text-sm placeholder-white/40 outline-none"
+              className="ml-2 w-full bg-transparent text-sm placeholder-white/40 outline-none [&::-webkit-search-cancel-button]:hidden"
               placeholder={t.searchPlaceholder}
             />
           </form>
@@ -258,9 +263,12 @@ export default function Header() {
               </svg>
             </button>
             <input
+              type="search"
+              enterKeyHint="search"
+              autoComplete="off"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="ml-2 w-full bg-transparent text-sm placeholder-white/40 outline-none"
+              className="ml-2 w-full bg-transparent text-sm placeholder-white/40 outline-none [&::-webkit-search-cancel-button]:hidden"
               placeholder={t.searchPlaceholder}
             />
           </form>
