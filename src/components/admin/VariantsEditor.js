@@ -5,6 +5,7 @@ import { ImageField, btnClass } from "@/components/admin/fields";
 import { usdToVnd, vndToUsd } from "@/lib/money";
 import { MAX_GROUPS, MAX_VALUES } from "@/lib/variants";
 
+const OPTION_CROP = { aspect: 1, allowFit: true, outWidth: 1200, title: "Chọn vùng ảnh cho phân loại (khung vuông 1:1)" };
 const inputClass = "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900";
 const labelClass = "text-xs font-semibold text-slate-600";
 
@@ -107,7 +108,7 @@ export default function VariantsEditor({ groups, onChange }) {
                   <div className="mt-3">
                     <p className={labelClass}>Ảnh riêng cho lựa chọn này (không bắt buộc, khách chọn sẽ thấy đổi ảnh)</p>
                     <div className="mt-2">
-                      <ImageField value={v.imageUrl} onChange={(url) => setValue(gi, vi, { imageUrl: url })} onError={setUploadErr} height="h-14" />
+                      <ImageField value={v.imageUrl} onChange={(url) => setValue(gi, vi, { imageUrl: url })} onError={setUploadErr} height="h-14" crop={OPTION_CROP} />
                     </div>
                   </div>
                   {g.values.length > 1 ? (

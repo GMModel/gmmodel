@@ -35,11 +35,11 @@ export function applyOverrides(base, overrides) {
 // Site-wide settings editable in admin (stored in SiteContent under id "settings").
 export const SETTING_FIELDS = [
   { key: "firstOrderPercent", label: "Giảm giá cho đơn hàng đầu tiên của khách có tài khoản (%) — nhập 0 để tắt. Nếu đổi số này, nhớ sửa chữ ở dòng thông báo đầu trang (tab Văn bản → banner)", placeholder: "10", group: "Ưu đãi", number: true },
-  { key: "favicon", label: "Favicon: biểu tượng nhỏ hiện trên tab trình duyệt (ảnh vuông PNG, từ 192×192 px trở lên)", group: "Logo & Favicon", image: true, url: true },
+  { key: "favicon", label: "Favicon: biểu tượng nhỏ hiện trên tab trình duyệt (ảnh vuông PNG, từ 192×192 px trở lên)", group: "Logo & Favicon", image: true, url: true, crop: { aspect: 1, allowFit: true, outWidth: 512, outputType: "image/png", title: "Chọn vùng ảnh cho favicon (khung vuông)" } },
   { key: "heroLink1", label: "Link nút 1 của banner trang chủ", placeholder: "/products", group: "Trang chủ", url: true },
   { key: "heroLink2", label: "Link nút 2 của banner trang chủ", placeholder: "/sale", group: "Trang chủ", url: true },
-  { key: "logoDark", label: "Logo chính, dùng khi web ở chế độ nền tối (mặc định). Nên là PNG nền trong suốt", group: "Logo & Favicon", image: true, url: true },
-  { key: "logoLight", label: "Logo cho chế độ nền sáng (Light). Để trống = dùng logo mặc định", group: "Logo & Favicon", image: true, url: true },
+  { key: "logoDark", label: "Logo chính, dùng khi web ở chế độ nền tối (mặc định). Nên là PNG nền trong suốt", group: "Logo & Favicon", image: true, url: true, crop: { aspect: 8 / 5, allowFit: true, outWidth: 800, outputType: "image/png", title: "Chỉnh logo (khung 8:5)" } },
+  { key: "logoLight", label: "Logo cho chế độ nền sáng (Light). Để trống = dùng logo mặc định", group: "Logo & Favicon", image: true, url: true, crop: { aspect: 8 / 5, allowFit: true, outWidth: 800, outputType: "image/png", title: "Chỉnh logo (khung 8:5)" } },
   { key: "payments", label: "Phương thức thanh toán hiển thị ở chân trang (cách nhau bằng dấu phẩy)", placeholder: "Visa, Mastercard, PayPal", group: "Thanh toán" },
   { key: "phone", label: "Số điện thoại", placeholder: "+84 347 347 823", group: "Liên hệ" },
   { key: "zaloShow", label: "Hiện nút Zalo", group: "Nút liên hệ nổi", options: [{ value: "on", label: "Bật" }, { value: "off", label: "Tắt" }] },

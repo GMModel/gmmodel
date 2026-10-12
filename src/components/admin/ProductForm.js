@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { uploadMedia } from "@/lib/clientUpload";
+import { useCropFlow } from "@/components/admin/CropFlow";
 import { FilePickButton } from "@/components/admin/fields";
 import { useRouter } from "next/navigation";
 import { BODY_STYLES } from "@/lib/bodyStyles";
@@ -16,6 +16,9 @@ const CATEGORIES = [
 const inputClass =
   "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900";
 const labelClass = "text-xs font-semibold text-slate-600";
+
+// Product photos are shown in square frames: the admin picks the region (or fits the whole photo with white padding).
+const PRODUCT_CROP = { aspect: 1, allowFit: true, outWidth: 1200 };
 
 export default function ProductForm({ product }) {
   const router = useRouter();
@@ -43,9 +46,8 @@ export default function ProductForm({ product }) {
     isBestSeller: product?.isBestSeller ?? false,
     variants: toFormVariants(product?.variants),
   });
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const mainCrop = useCropFlow({ ...PRODUCT_CROP, title: "Chọn vùng ảnh đại diện (khung vuông 1:1)" });
+  const galleryCrop = useCropFlow({ ...PRODUCT_CROP, title: "Chọn vùng ảnh cho thư viện (khung vuông 1:1)" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -65,29 +67,6 @@ export default function ProductForm({ product }) {
   function update(key, value) {
     setForm((f) => ({ ...f, [key]: value }));
   }
-
-  // Runs an upload for one section, showing progress and errors right next to its button.
-  async function runUpload(fn) {
-    setUploading(true);
-    setUploadError("");
-    setUploadProgress(0);
-    try {
-      await fn();
-    } catch (err) {
-      setUploadError(err.message || "Tải lên thất bại");
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
-    }
-  }
-
-  const handleUpload = (files) => runUpload(async () => update("imageUrl", await uploadMedia(files[0], setUploadProgress)));
-  const handleGalleryUpload = (files) =>
-    runUpload(async () => {
-      const urls = [];
-      for (const file of files) urls.push(await uploadMedia(file, setUploadProgress));
-      setForm((f) => ({ ...f, galleryUrls: [...f.galleryUrls, ...urls] }));
-    });
 
   function removeGalleryImage(index) {
     setForm((f) => ({ ...f, galleryUrls: f.galleryUrls.filter((_, i) => i !== index) }));
@@ -124,6 +103,8 @@ export default function ProductForm({ product }) {
 
   return (
     <form onSubmit={handleSubmit} className="mt-6 max-w-3xl">
+      {mainCrop.dialog}
+      {galleryCrop.dialog}
       {error ? (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
       ) : null}
@@ -266,11 +247,10 @@ export default function ProductForm({ product }) {
             )}
           </div>
           <div className="w-full min-w-0 flex-1">
-            <FilePickButton accept="image/*" disabled={uploading} onFiles={handleUpload}>
+            <FilePickButton accept="image/*" onFiles={(files) => mainCrop.start(files.slice(0, 1), (url) => update("imageUrl", url))}>
               Chọn ảnh từ thư viện
             </FilePickButton>
-            {uploading ? <p className="mt-2 text-xs text-slate-500">{uploadProgress > 0 ? `Đang tải lên ${uploadProgress}%…` : "Đang tải lên, vui lòng đợi…"}</p> : null}
-            {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
+            <p className="mt-1 text-xs text-slate-400">Sau khi chọn, bạn kéo ảnh để chọn vùng vừa khung vuông (hoặc thu nhỏ để hiện trọn cả ảnh).</p>
             <div className="mt-3">
               <label className={labelClass}>Hoặc dán URL ảnh</label>
               <input value={form.imageUrl} onChange={(e) => update("imageUrl", e.target.value)} className={inputClass} placeholder="https://..." />
@@ -302,12 +282,14 @@ export default function ProductForm({ product }) {
           ))}
         </div>
         <div className="mt-3">
-          <FilePickButton accept="image/*" multiple disabled={uploading} onFiles={handleGalleryUpload}>
+          <FilePickButton
+            accept="image/*"
+            multiple
+            onFiles={(files) => galleryCrop.start(files, (url) => setForm((f) => ({ ...f, galleryUrls: [...f.galleryUrls, url] })))}
+          >
             Thêm ảnh từ thư viện
           </FilePickButton>
         </div>
-        {uploading ? <p className="mt-2 text-xs text-slate-500">{uploadProgress > 0 ? `Đang tải lên ${uploadProgress}%…` : "Đang tải lên, vui lòng đợi…"}</p> : null}
-        {uploadError ? <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p> : null}
       </div>
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -335,7 +317,7 @@ export default function ProductForm({ product }) {
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="submit"
-          disabled={saving || uploading}
+          disabled={saving}
           className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
         >
           {saving ? "Đang lưu..." : isEdit ? "Lưu thay đổi" : "Tạo sản phẩm"}

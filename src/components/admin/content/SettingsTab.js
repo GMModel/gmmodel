@@ -93,6 +93,7 @@ export default function SettingsTab() {
                         onChange={(url) => setSettings((s) => ({ ...s, [f.key]: url }))}
                         onError={(text) => setMessage({ ok: false, text })}
                         height="h-14"
+                        crop={f.crop}
                       />
                     ) : f.long ? (
                       <textarea

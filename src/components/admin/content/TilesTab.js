@@ -14,11 +14,14 @@ import {
   saveSite,
 } from "@/components/admin/fields";
 
+// Homepage category tiles are wide strips; the grid fills each frame with the photo (centre-cropped on phones).
+const TILE_CROP = { aspect: 2, outWidth: 1200, title: "Chọn vùng ảnh cho ô danh mục (khung 2:1)" };
+
 function TileEditor({ tile, onChange, onError, actions, showTag }) {
   return (
     <div className="space-y-3 rounded-xl border border-slate-200 p-4">
       <div className="flex items-start justify-between gap-3">
-        <ImageField value={tile.imageUrl} onChange={(imageUrl) => onChange({ ...tile, imageUrl })} onError={onError} />
+        <ImageField value={tile.imageUrl} onChange={(imageUrl) => onChange({ ...tile, imageUrl })} onError={onError} crop={TILE_CROP} />
         {actions}
       </div>
       <LocalizedInput label="Tên hiển thị (VN / US / ES)" value={tile.label} onChange={(label) => onChange({ ...tile, label })} />

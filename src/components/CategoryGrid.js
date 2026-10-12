@@ -22,7 +22,7 @@ export default function CategoryGrid() {
           href={featured.link || "/products"}
           className={`${tileClass} col-span-2 row-span-2 h-64 md:h-auto`}
         >
-          <ModelThumb color="#d1d5db" src={featured.imageUrl || undefined} className="h-full w-full" />
+          <ModelThumb color="#d1d5db" src={featured.imageUrl || undefined} fit="cover" className="h-full w-full" />
           {pickLocalized(featured.tag, locale) && (
             <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold">
               {pickLocalized(featured.tag, locale)}
@@ -32,7 +32,7 @@ export default function CategoryGrid() {
         </Link>
         {tiles.map((tile, i) => (
           <Link key={i} href={tile.link || "/products"} className={`${tileClass} h-[120px] md:h-auto`}>
-            <ModelThumb color={tile.color} src={tile.imageUrl || undefined} className="h-full w-full" />
+            <ModelThumb color={tile.color} src={tile.imageUrl || undefined} fit="cover" className="h-full w-full" />
             <span className="absolute bottom-2 left-2 text-xs font-bold">{pickLocalized(tile.label, locale)}</span>
           </Link>
         ))}
@@ -41,7 +41,7 @@ export default function CategoryGrid() {
       <div className="mx-auto mt-3 hidden max-w-[1336px] grid-cols-2 gap-3 md:grid md:grid-cols-4 md:auto-rows-[95px]">
         {brandTiles.map((tile, i) => (
           <Link key={i} href={tile.link || "/products"} className={`${tileClass} h-[95px] md:h-auto`}>
-            <ModelThumb color={tile.color} src={tile.imageUrl || undefined} className="h-full w-full" />
+            <ModelThumb color={tile.color} src={tile.imageUrl || undefined} fit="cover" className="h-full w-full" />
             <span className="absolute bottom-2 left-2 text-xs font-bold">{pickLocalized(tile.label, locale)}</span>
           </Link>
         ))}

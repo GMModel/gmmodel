@@ -7,15 +7,28 @@ const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
 // Modal that lets the admin pick which part of a photo fits a fixed frame (aspect = width / height):
 // drag the photo to move it, use the slider / mouse wheel / two-finger pinch to zoom.
-// Calls onDone(File) with a JPEG of exactly that region; onDone may be async (the modal shows "busy" until it settles
-// and shows the error message if it throws, so the admin can retry).
-export default function ImageCropper({ file, aspect, outWidth = 1600, title = "Chọn vùng ảnh", counter = "", onCancel, onDone }) {
+//  - allowFit: the photo may also be shrunk until the WHOLE photo fits inside the frame (the rest is padding,
+//    white for JPEG, transparent for PNG). Starts in that "whole photo" view.
+//  - outputType: "image/jpeg" (default, white padding) or "image/png" (keeps transparency, for logos).
+// Calls onDone(File) with the result; onDone may be async (the modal shows "busy" until it settles and shows the
+// error message if it throws, so the admin can retry).
+export default function ImageCropper({
+  file,
+  aspect,
+  outWidth = 1600,
+  allowFit = false,
+  outputType = "image/jpeg",
+  title = "Chọn vùng ảnh",
+  counter = "",
+  onCancel,
+  onDone,
+}) {
   const frameRef = useRef(null);
   const pointers = useRef(new Map());
   const gesture = useRef(null);
   const [img, setImg] = useState(null);
   const [center, setCenter] = useState(null); // point of the photo (in photo pixels) shown at the middle of the frame
-  const [zoom, setZoom] = useState(1);
+  const [zoomState, setZoomState] = useState(null); // null = default view
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -53,15 +66,16 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
   }, []);
 
   const ready = Boolean(img && center && box.w > 0);
-  const minScale = ready ? Math.max(box.w / img.naturalWidth, box.h / img.naturalHeight) : 1; // photo just covers the frame
-  const scale = minScale * zoom;
-  // Keep the frame fully covered by the photo, whatever the zoom/position.
-  const cc = ready
-    ? {
-        x: clamp(center.x, box.w / (2 * scale), img.naturalWidth - box.w / (2 * scale)),
-        y: clamp(center.y, box.h / (2 * scale), img.naturalHeight - box.h / (2 * scale)),
-      }
-    : null;
+  // zoom 1 = photo just covers the frame. With allowFit the zoom can go below 1 (whole photo visible).
+  const coverScale = ready ? Math.max(box.w / img.naturalWidth, box.h / img.naturalHeight) : 1;
+  const containScale = ready ? Math.min(box.w / img.naturalWidth, box.h / img.naturalHeight) : 1;
+  const minZoom = allowFit && ready ? containScale / coverScale : 1;
+  const zoom = clamp(zoomState ?? (allowFit ? minZoom : 1), minZoom, MAX_ZOOM);
+  const scale = coverScale * zoom;
+
+  // Keep the photo from leaving the frame; if it is smaller than the frame in one direction, centre it there.
+  const axis = (c, frame, full) => (frame / scale >= full ? full / 2 : clamp(c, frame / (2 * scale), full - frame / (2 * scale)));
+  const cc = ready ? { x: axis(center.x, box.w, img.naturalWidth), y: axis(center.y, box.h, img.naturalHeight) } : null;
 
   // Mouse wheel zoom (needs a non-passive listener to stop the page from scrolling).
   useEffect(() => {
@@ -69,11 +83,11 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
     if (!el) return;
     const onWheel = (e) => {
       e.preventDefault();
-      setZoom((z) => clamp(z * (e.deltaY < 0 ? 1.08 : 1 / 1.08), 1, MAX_ZOOM));
+      setZoomState((z) => clamp((z ?? minZoom) * (e.deltaY < 0 ? 1.08 : 1 / 1.08), minZoom, MAX_ZOOM));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+  }, [minZoom]);
 
   // Escape closes the modal.
   useEffect(() => {
@@ -115,7 +129,7 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
     } else if (g.type === "pinch" && pointers.current.size >= 2) {
       const pts = [...pointers.current.values()];
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
-      setZoom(clamp(g.zoom * (dist / g.dist), 1, MAX_ZOOM));
+      setZoomState(clamp(g.zoom * (dist / g.dist), minZoom, MAX_ZOOM));
     }
   }
 
@@ -139,14 +153,24 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
       canvas.width = outW;
       canvas.height = outH;
       const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, outW, outH);
+      const isPng = outputType === "image/png";
+      if (!isPng) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, outW, outH);
+      }
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+      // Only the part of the chosen region that lies on the photo is drawn (the rest stays padding).
+      const ix0 = Math.max(sx, 0);
+      const iy0 = Math.max(sy, 0);
+      const ix1 = Math.min(sx + sw, img.naturalWidth);
+      const iy1 = Math.min(sy + sh, img.naturalHeight);
+      if (ix1 > ix0 && iy1 > iy0) {
+        ctx.drawImage(img, ix0, iy0, ix1 - ix0, iy1 - iy0, ((ix0 - sx) / sw) * outW, ((iy0 - sy) / sh) * outH, ((ix1 - ix0) / sw) * outW, ((iy1 - iy0) / sh) * outH);
+      }
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, isPng ? undefined : 0.92));
       if (!blob) throw new Error("Không cắt được ảnh, vui lòng thử ảnh khác.");
-      const base = (file.name || "banner").replace(/\.[^.]+$/, "");
-      await onDone(new File([blob], `${base}-crop.jpg`, { type: "image/jpeg" }));
+      const base = (file.name || "image").replace(/\.[^.]+$/, "");
+      await onDone(new File([blob], `${base}-crop.${isPng ? "png" : "jpg"}`, { type: outputType }));
     } catch (err) {
       setError(err?.message || "Có lỗi xảy ra, vui lòng thử lại.");
       setBusy(false);
@@ -162,6 +186,12 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
       }
     : { display: "none" };
 
+  // Checkerboard shows where a PNG will stay transparent.
+  const frameBg =
+    outputType === "image/png"
+      ? { backgroundColor: "#e2e8f0", backgroundImage: "linear-gradient(45deg,#cbd5e1 25%,transparent 25%,transparent 75%,#cbd5e1 75%),linear-gradient(45deg,#cbd5e1 25%,transparent 25%,transparent 75%,#cbd5e1 75%)", backgroundSize: "16px 16px", backgroundPosition: "0 0,8px 8px" }
+      : { backgroundColor: "#ffffff" };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/70 p-3 sm:items-center sm:p-6" role="dialog" aria-modal="true">
       <div className="w-full max-w-xl rounded-2xl bg-white p-4 shadow-xl sm:p-6">
@@ -170,7 +200,8 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
           {counter ? <span className="text-xs text-slate-500">{counter}</span> : null}
         </div>
         <p className="mt-1 text-xs text-slate-500">
-          Kéo ảnh để chọn vùng cần hiện. Kéo thanh trượt (hoặc cuộn chuột, hoặc chụm 2 ngón) để phóng to / thu nhỏ. Phần nằm trong khung là phần sẽ hiện trên web.
+          Kéo ảnh để chọn vùng cần hiện. Kéo thanh trượt (hoặc cuộn chuột, hoặc chụm 2 ngón) để phóng to / thu nhỏ
+          {allowFit ? ", thu nhỏ hết cỡ để hiện trọn cả ảnh" : ""}. Phần nằm trong khung là phần sẽ hiện trên web.
         </p>
 
         <div
@@ -179,8 +210,8 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          className="relative mt-4 w-full touch-none select-none overflow-hidden rounded-lg border-2 border-slate-900 bg-slate-200"
-          style={{ aspectRatio: String(aspect), cursor: ready ? "grab" : "default" }}
+          className="relative mt-4 w-full touch-none select-none overflow-hidden rounded-lg border-2 border-slate-900"
+          style={{ aspectRatio: String(aspect), cursor: ready ? "grab" : "default", ...frameBg }}
         >
           {img ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -191,7 +222,7 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
           {/* rule-of-thirds guide */}
           <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3">
             {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="border border-white/30" />
+              <div key={i} className="border border-slate-900/20" />
             ))}
           </div>
         </div>
@@ -200,25 +231,25 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
           <button
             type="button"
             aria-label="Thu nhỏ"
-            onClick={() => setZoom((z) => clamp(z / 1.2, 1, MAX_ZOOM))}
+            onClick={() => setZoomState(clamp(zoom / 1.2, minZoom, MAX_ZOOM))}
             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-300 text-lg font-semibold hover:bg-slate-50"
           >
             −
           </button>
           <input
             type="range"
-            min={1}
+            min={minZoom}
             max={MAX_ZOOM}
             step={0.01}
             value={zoom}
             aria-label="Phóng to / thu nhỏ"
-            onChange={(e) => setZoom(Number(e.target.value))}
+            onChange={(e) => setZoomState(Number(e.target.value))}
             className="h-2 w-full cursor-pointer accent-slate-900"
           />
           <button
             type="button"
             aria-label="Phóng to"
-            onClick={() => setZoom((z) => clamp(z * 1.2, 1, MAX_ZOOM))}
+            onClick={() => setZoomState(clamp(zoom * 1.2, minZoom, MAX_ZOOM))}
             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-300 text-lg font-semibold hover:bg-slate-50"
           >
             +
@@ -227,7 +258,7 @@ export default function ImageCropper({ file, aspect, outWidth = 1600, title = "C
         <button
           type="button"
           onClick={() => {
-            setZoom(1);
+            setZoomState(null);
             if (img) setCenter({ x: img.naturalWidth / 2, y: img.naturalHeight / 2 });
           }}
           className="mt-2 text-xs font-semibold text-slate-500 hover:text-slate-900"

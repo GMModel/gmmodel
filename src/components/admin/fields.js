@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LOCALE_IDS } from "@/lib/contentUtils";
 import { uploadMedia } from "@/lib/clientUpload";
+import { useCropFlow } from "@/components/admin/CropFlow";
 
 export const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900 placeholder:text-slate-400";
@@ -47,13 +48,18 @@ export function FilePickButton({ accept, multiple = false, disabled = false, onF
 }
 
 // Image URL field with upload button + preview.
-export function ImageField({ value, onChange, onError, height = "h-20" }) {
+export function ImageField({ value, onChange, onError, height = "h-20", crop }) {
   const [uploading, setUploading] = useState(false);
+  const flow = useCropFlow(crop ?? {}); // used only when `crop` is given
 
   async function handleFile(e) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    if (crop) {
+      flow.start([file], onChange); // crop first; the cropped photo is uploaded from the dialog
+      return;
+    }
     setUploading(true);
     try {
       onChange(await uploadImage(file));
@@ -66,6 +72,7 @@ export function ImageField({ value, onChange, onError, height = "h-20" }) {
 
   return (
     <div className="flex items-center gap-3">
+      {crop ? flow.dialog : null}
       {value ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={value} alt="" className={`${height} w-28 rounded-lg bg-slate-100 object-contain`} />
