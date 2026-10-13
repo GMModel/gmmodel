@@ -120,11 +120,24 @@ model Order {
   fulfillmentStatus String      @default("pending_confirmation")
   providerRef       String?
   items             OrderItem[]
+  events            OrderEvent[]
   createdAt         DateTime    @default(now())
 
   @@index([userId])
   @@index([fulfillmentStatus])
   @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+// One row per status the order has been through (placed, confirmed, preparing...). Feeds the customer notification bell.
+model OrderEvent {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    String
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
   @@index([createdAt])
 }
 

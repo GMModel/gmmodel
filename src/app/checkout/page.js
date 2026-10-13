@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 import ModelThumb from "@/components/ModelThumb";
 import { buildLinks } from "@/components/ContactIcons";
+import { rememberOrderCode } from "@/components/NotificationBell";
 import { pickProductName } from "@/lib/i18n";
 
 export default function CheckoutPage() {
@@ -163,6 +164,7 @@ export default function CheckoutPage() {
       if (!orderRes.ok) throw new Error(order.error ?? "Order failed");
 
       clear();
+      rememberOrderCode(order.code); // so the bell can follow this order even without an account
       setResult({ code: order.code });
     } catch (err) {
       setError(err.message);

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import NotificationBell from "@/components/NotificationBell";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import { useCart } from "@/context/CartContext";
@@ -129,6 +130,7 @@ export default function Header() {
           </form>
 
           <div className="ml-auto flex items-center gap-4 md:hidden">
+            <NotificationBell />
             <Link
               href="/wishlist"
               aria-label="wishlist"
@@ -173,6 +175,7 @@ export default function Header() {
                 ))}
               </div>
             </div>
+            <NotificationBell />
             <Link
               href="/wishlist"
               aria-label="wishlist"

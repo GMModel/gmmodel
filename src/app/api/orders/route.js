@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { generateOrderCode } from "@/lib/orderCode";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { sendOrderConfirmationEmail, sendNewOrderAlert } from "@/lib/email";
 import { validateCoupon } from "@/lib/coupons";
 import { resolveSelection, selectionText } from "@/lib/variants";
 import { getFirstOrderDiscount, FIRST_ORDER_CODE } from "@/lib/firstOrder";
@@ -147,12 +147,16 @@ export async function POST(request) {
           paymentMethod,
           paymentStatus: paymentMethod === "cod" ? "cod_pending" : "pending",
           items: { create: orderItemsData },
+          events: { create: { status: "pending_confirmation" } },
         },
       });
     });
 
-    sendOrderConfirmationEmail({ order, items: orderItemsData }).catch((err) => {
-      console.error("Order confirmation email failed:", err);
+    after(async () => {
+      await Promise.allSettled([
+        sendOrderConfirmationEmail({ order, items: orderItemsData }).catch((err) => console.error("Order confirmation email failed:", err)),
+        sendNewOrderAlert({ order, items: orderItemsData }).catch((err) => console.error("New order alert email failed:", err)),
+      ]);
     });
 
     return NextResponse.json({

@@ -299,6 +299,19 @@ export const dictionary = {
       error: "Something went wrong. Please try again.",
       required: "Please fill in your name, email and message.",
     },
+    notify: {
+      title: "Notifications",
+      empty: "No notifications yet. After you place an order, its status updates will show up here.",
+      status: {
+        pending_confirmation: "Order {code} has been placed — waiting for the seller to confirm.",
+        confirmed: "Order {code} has been confirmed by the seller.",
+        preparing: "Order {code} is being prepared by the seller.",
+        shipped: "Order {code} has been handed to the carrier.",
+        in_transit: "Order {code} is on its way to you.",
+        delivered: "Order {code} was delivered. Thank you for shopping with us!",
+        cancelled: "Order {code} has been cancelled.",
+      },
+    },
     contactIcons: {
       zalo: "Chat on Zalo",
       whatsapp: "Chat on WhatsApp",
@@ -622,6 +635,19 @@ export const dictionary = {
       error: "Algo salió mal. Inténtalo de nuevo.",
       required: "Por favor completa tu nombre, correo electrónico y mensaje.",
     },
+    notify: {
+      title: "Notificaciones",
+      empty: "Aún no hay notificaciones. Cuando hagas un pedido, aquí verás cómo avanza.",
+      status: {
+        pending_confirmation: "El pedido {code} se ha realizado — esperando la confirmación del vendedor.",
+        confirmed: "El pedido {code} ha sido confirmado por el vendedor.",
+        preparing: "El vendedor está preparando el pedido {code}.",
+        shipped: "El pedido {code} se ha entregado al transportista.",
+        in_transit: "El pedido {code} está en camino.",
+        delivered: "El pedido {code} fue entregado. ¡Gracias por tu compra!",
+        cancelled: "El pedido {code} ha sido cancelado.",
+      },
+    },
     contactIcons: {
       zalo: "Chatear por Zalo",
       whatsapp: "Chatear por WhatsApp",
@@ -944,6 +970,19 @@ export const dictionary = {
       success: "Cảm ơn bạn! Tin nhắn đã được gửi — shop sẽ phản hồi sớm nhất có thể.",
       error: "Có lỗi xảy ra. Vui lòng thử lại.",
       required: "Vui lòng nhập họ tên, email và nội dung.",
+    },
+    notify: {
+      title: "Thông báo",
+      empty: "Chưa có thông báo nào. Sau khi đặt hàng, trạng thái đơn của bạn sẽ hiện ở đây.",
+      status: {
+        pending_confirmation: "Đơn hàng {code} đã được đặt — đang chờ người bán xác nhận.",
+        confirmed: "Đơn hàng {code} đã được người bán xác nhận.",
+        preparing: "Đơn hàng {code} đang được người bán chuẩn bị.",
+        shipped: "Đơn hàng {code} đã được bàn giao cho đơn vị vận chuyển.",
+        in_transit: "Đơn hàng {code} đang trên đường giao đến bạn.",
+        delivered: "Đơn hàng {code} đã giao thành công. Cảm ơn bạn đã mua hàng!",
+        cancelled: "Đơn hàng {code} đã bị huỷ.",
+      },
     },
     contactIcons: {
       zalo: "Chat qua Zalo",

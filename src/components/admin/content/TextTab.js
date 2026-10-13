@@ -30,6 +30,7 @@ const SECTION_LABELS = {
   preOrders: "Đặt trước",
   browseAll: "Nút xem tất cả",
   preorderSection: "Khối đặt trước",
+  notify: "Chuông thông báo",
   productSection: "Khối sản phẩm",
   productsPage: "Trang sản phẩm",
   salePage: "Trang giảm giá",

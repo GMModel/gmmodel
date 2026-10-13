@@ -51,6 +51,14 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: "No changes" }, { status: 400 });
   }
 
+  const existing = await prisma.order.findUnique({ where: { code }, select: { fulfillmentStatus: true } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // A new fulfilment status becomes a notification for the customer (bell in the header).
+  if (data.fulfillmentStatus && data.fulfillmentStatus !== existing.fulfillmentStatus) {
+    data.events = { create: { status: data.fulfillmentStatus } };
+  }
+
   const order = await prisma.order.update({ where: { code }, data });
   return NextResponse.json(order);
 }
