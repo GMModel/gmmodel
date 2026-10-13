@@ -29,7 +29,6 @@ const SECTION_LABELS = {
   newArrivals: "Hàng mới về",
   preOrders: "Đặt trước",
   browseAll: "Nút xem tất cả",
-  perks: "Thanh ưu đãi",
   preorderSection: "Khối đặt trước",
   productSection: "Khối sản phẩm",
   productsPage: "Trang sản phẩm",
