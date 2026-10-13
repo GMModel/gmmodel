@@ -14,8 +14,8 @@ import { pickLabel } from "@/lib/i18n";
 const PAGE_SIZE = 12;
 
 export default function ProductsPageClient() {
-  const { t, locale, scales, countryGroups, scaleLabel } = useStore();
-  const TAB_KEYS = ["all", "new", "preorder", "bestseller", "sale", ...scales.map((s) => s.slug)];
+  const { t, locale, brandList, scales, countryGroups, scaleLabel } = useStore();
+  const STATUS_KEYS = ["new", "preorder", "bestseller", "sale"];
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -29,6 +29,7 @@ export default function ProductsPageClient() {
   const [searchInput, setSearchInput] = useState(q);
   useEffect(() => setSearchInput(q), [q]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [pickedField, setPickedField] = useState(null); // which field's options are showing in the panel
 
   const [data, setData] = useState({ items: [], total: 0 });
   const [loading, setLoading] = useState(true);
@@ -83,8 +84,29 @@ export default function ProductsPageClient() {
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
   const hasFilters = activeBrand || activeCountry || activeBodyStyle || q || activeTab !== "all";
 
+  // One filter at a time: the customer picks a field (status / scale / brand / car type), then one value.
+  // Choosing a value replaces whatever filter was active before.
+  const fields = [
+    { key: "status", label: t.productsPage.fieldStatus, param: "tab", options: STATUS_KEYS.map((k) => ({ value: k, label: t.productSection.tabs[k] })) },
+    { key: "scale", label: t.productsPage.fieldScale, param: "tab", options: scales.map((s) => ({ value: s.slug, label: scaleLabel(s.slug) })) },
+    { key: "brand", label: t.productSection.carBrandFilterLabel, param: "country", options: countryGroups.map((g) => ({ value: g.slug, label: pickLabel(g, locale) })) },
+    { key: "type", label: t.nav.usedModels, param: "bodyStyle", options: BODY_STYLES.map((b) => ({ value: b.slug, label: pickLabel(b, locale) })) },
+  ];
+  const currentValue = { tab: activeTab !== "all" ? activeTab : null, country: activeCountry, bodyStyle: activeBodyStyle };
+  const activeField = fields.find((f) => currentValue[f.param] && f.options.some((o) => o.value === currentValue[f.param]));
+  const activeOption = activeField?.options.find((o) => o.value === currentValue[activeField.param]);
+  const makerLabel = activeBrand ? brandList.find((b) => b.slug === activeBrand)?.label ?? activeBrand : null; // legacy ?brand= links
+  const activeLabel = activeOption?.label ?? makerLabel;
+  const shownField = fields.find((f) => f.key === (pickedField ?? activeField?.key ?? "status")) ?? fields[0];
+
+  function pick(param, value) {
+    goTo({ tab: null, country: null, bodyStyle: null, brand: null, ...(value ? { [param]: value } : {}) });
+    setFiltersOpen(false);
+    setPickedField(null);
+  }
+
   const chipClass = (active) =>
-    `rounded-full border px-3 py-1 text-[11px] transition-colors ${
+    `rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
       active ? "border-white bg-white text-black" : "border-white/20 text-white/60 hover:border-white/50"
     }`;
 
@@ -110,7 +132,10 @@ export default function ProductsPageClient() {
             </form>
             <button
               type="button"
-              onClick={() => setFiltersOpen((v) => !v)}
+              onClick={() => {
+                setFiltersOpen((v) => !v);
+                setPickedField(null);
+              }}
               aria-expanded={filtersOpen}
               className={`relative flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 filtersOpen ? "border-white bg-white text-black" : "border-white/20 text-white/70 hover:border-white/50"
@@ -126,6 +151,23 @@ export default function ProductsPageClient() {
             </button>
           </div>
 
+          {activeLabel ? (
+            <div className="mt-4 flex items-center gap-2 text-xs text-white/50">
+              <span>{t.productsPage.filteringBy}:</span>
+              <button
+                type="button"
+                onClick={() => pick(null, null)}
+                aria-label={t.productsPage.clearFilter}
+                className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 font-semibold text-black hover:bg-white/90"
+              >
+                {activeLabel}
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ) : null}
+
           {q ? (
             <p className="mt-4 text-sm text-white/60">
               {t.productsPage.searchResultsFor} <span className="text-white">&ldquo;{q}&rdquo;</span>
@@ -133,41 +175,37 @@ export default function ProductsPageClient() {
           ) : null}
 
           {filtersOpen ? (
-            <div className="mt-4 rounded-lg border border-white/10 bg-neutral-950 p-4">
-              <div className="flex flex-wrap gap-2">
-                {TAB_KEYS.map((key) => (
+            <div className="mt-4 rounded-xl border border-white/10 bg-neutral-950 p-3">
+              <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/5 p-1 sm:grid-cols-4" role="tablist">
+                {fields.map((f) => (
                   <button
-                    key={key}
-                    onClick={() => goTo({ tab: key === "all" ? null : key })}
-                    className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
-                      activeTab === key ? "bg-white text-black" : "bg-white/10 text-white/70 hover:bg-white/20"
+                    key={f.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={shownField.key === f.key}
+                    onClick={() => setPickedField(f.key)}
+                    className={`relative rounded-md px-3 py-2 text-xs font-semibold transition-colors ${
+                      shownField.key === f.key ? "bg-white text-black" : "text-white/70 hover:bg-white/10"
                     }`}
                   >
-                    {t.productSection.tabs[key] ?? scaleLabel(key)}
+                    {f.label}
+                    {activeField?.key === f.key ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-600" /> : null}
                   </button>
                 ))}
               </div>
 
-              <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">{t.productSection.carBrandFilterLabel}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button onClick={() => goTo({ country: null })} className={chipClass(!activeCountry)}>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={() => pick(null, null)} className={chipClass(!activeLabel)}>
                   {t.productSection.tabs.all}
                 </button>
-                {countryGroups.map((group) => (
-                  <button key={group.slug} onClick={() => goTo({ country: group.slug })} className={chipClass(activeCountry === group.slug)}>
-                    {pickLabel(group, locale)}
-                  </button>
-                ))}
-              </div>
-
-              <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">{t.nav.usedModels}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button onClick={() => goTo({ bodyStyle: null })} className={chipClass(!activeBodyStyle)}>
-                  {t.productSection.tabs.all}
-                </button>
-                {BODY_STYLES.map((style) => (
-                  <button key={style.slug} onClick={() => goTo({ bodyStyle: style.slug })} className={chipClass(activeBodyStyle === style.slug)}>
-                    {pickLabel(style, locale)}
+                {shownField.options.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => pick(shownField.param, o.value)}
+                    className={chipClass(currentValue[shownField.param] === o.value)}
+                  >
+                    {o.label}
                   </button>
                 ))}
               </div>
