@@ -92,15 +92,15 @@ export default function NotificationBell() {
   const message = (e) => (t.notify.status[e.status] ?? t.notify.status.pending_confirmation).replace("{code}", e.code);
 
   return (
-    <div className="relative" ref={boxRef}>
+    <div className="relative flex items-center" ref={boxRef}>
       <button
         type="button"
         aria-label={t.notify.title}
         aria-expanded={open}
         onClick={toggle}
-        className={`relative transition-colors hover:text-red-500 ${unread > 0 ? "text-red-500" : ""}`}
+        className={`relative flex items-center transition-colors hover:text-red-500 ${unread > 0 ? "text-red-500" : ""}`}
       >
-        <svg className="h-[22px] w-[22px]" fill={unread > 0 ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="h-5 w-5" fill={unread > 0 ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
