@@ -9,19 +9,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
 import ModelThumb from "@/components/ModelThumb";
+import { buildLinks } from "@/components/ContactIcons";
 import { pickProductName } from "@/lib/i18n";
 
-const METHODS = ["cod", "momo", "crypto", "paypal", "card"];
-const NETWORKS = [
-  { key: "bep20", label: "BEP20 (BNB Smart Chain)" },
-  { key: "trc20", label: "TRC20 (Tron)" },
-];
-
 export default function CheckoutPage() {
-  const { t, locale, formatPrice } = useStore();
+  const { t, locale, formatPrice, settings } = useStore();
   const { items, totalPriceUsd, clear } = useCart();
-  const [method, setMethod] = useState("cod");
-  const [network, setNetwork] = useState("bep20");
   const [user, setUser] = useState(null);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState("new");
@@ -32,14 +25,12 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [copied, setCopied] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
   const [firstOrder, setFirstOrder] = useState({ eligible: false, percent: 0, discountUsd: 0, signedIn: false });
-  // { code, status: "cod" | "redirecting" | "crypto", address?, qrDataUrl?, amountUsd? }
+  // { code } once the order is placed (cash on delivery is the only payment method)
   const [result, setResult] = useState(null);
 
   useEffect(() => {
@@ -162,7 +153,7 @@ export default function CheckoutPage() {
             qty: i.qty,
             options: i.variantOptions?.map((o) => ({ group: o.group, value: o.value })) ?? undefined,
           })),
-          paymentMethod: method,
+          paymentMethod: "cod",
           ...shipping,
           email: email.trim() || null,
           couponCode: appliedCoupon?.code ?? null,
@@ -171,66 +162,8 @@ export default function CheckoutPage() {
       const order = await orderRes.json();
       if (!orderRes.ok) throw new Error(order.error ?? "Order failed");
 
-      if (method === "cod") {
-        clear();
-        setResult({ code: order.code, status: "cod" });
-        return;
-      }
-
-      if (method === "momo") {
-        const res = await fetch("/api/payments/momo/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: order.code }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "MoMo error");
-        clear();
-        setResult({ code: order.code, status: "redirecting" });
-        window.location.href = data.payUrl;
-        return;
-      }
-
-      if (method === "card") {
-        const res = await fetch("/api/payments/card/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: order.code }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Card error");
-        clear();
-        setResult({ code: order.code, status: "redirecting" });
-        window.location.href = data.approveUrl;
-        return;
-      }
-
-      if (method === "paypal") {
-        const res = await fetch("/api/payments/paypal/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: order.code }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "PayPal error");
-        clear();
-        setResult({ code: order.code, status: "redirecting" });
-        window.location.href = data.approveUrl;
-        return;
-      }
-
-      if (method === "crypto") {
-        const res = await fetch("/api/payments/crypto/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: order.code, network }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Crypto error");
-        clear();
-        setResult({ code: order.code, status: "crypto", address: data.address, qrDataUrl: data.qrDataUrl, amountUsd: data.amountUsd });
-        return;
-      }
+      clear();
+      setResult({ code: order.code });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -238,20 +171,7 @@ export default function CheckoutPage() {
     }
   }
 
-  function handleCopyAddress() {
-    navigator.clipboard.writeText(result.address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }
-
-  async function handleConfirmPaid() {
-    await fetch("/api/payments/crypto/confirm", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: result.code }),
-    });
-    setConfirmed(true);
-  }
+  const contactLinks = buildLinks(t, settings).filter((l) => l.show);
 
   return (
     <>
@@ -261,54 +181,32 @@ export default function CheckoutPage() {
           <h1 className="text-xl font-black tracking-tight">{t.checkout.title}</h1>
 
           {result ? (
-            <div className="mt-8 rounded-lg border border-white/10 bg-neutral-950 p-6 text-center">
-              <p className="text-xs text-white/50">
-                {t.checkout.orderCode}: <span className="text-white">{result.code}</span>
+            <div className="mt-8 rounded-lg border border-green-600/40 bg-neutral-950 p-6 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-600/20 text-3xl text-green-500">✓</div>
+              <h2 className="mt-4 text-xl font-black text-green-500">{t.checkout.orderSuccess}</h2>
+              <p className="mt-2 text-xs text-white/50">
+                {t.checkout.orderCode}: <span className="font-semibold text-white">{result.code}</span>
               </p>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/80">{t.checkout.orderSuccessNote}</p>
 
-              {result.status === "cod" ? (
-                <>
-                  <p className="mt-3 text-lg font-bold text-green-500">✓</p>
-                  <p className="mt-2 text-sm text-white/70">{t.checkout.codPlaced}</p>
-                </>
-              ) : result.status === "redirecting" ? (
-                <p className="mt-4 text-sm text-white/70">{t.checkout.redirecting}</p>
-              ) : result.status === "crypto" ? (
-                confirmed ? (
-                  <p className="mt-4 text-sm text-amber-400">{t.checkout.statusAwaitingVerification}</p>
-                ) : (
-                  <>
-                    <p className="mt-4 text-sm text-white/70">{t.checkout.scanToPay}</p>
-                    {result.qrDataUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={result.qrDataUrl} alt="QR" className="mx-auto mt-4 h-56 w-56 rounded bg-white p-2" />
-                    ) : null}
-
-                    <div className="mx-auto mt-4 max-w-sm rounded border border-white/10 bg-black/30 p-4 text-left text-sm">
-                      <p className="text-white/50">{t.checkout.cryptoAmount}</p>
-                      <p className="font-bold text-red-500">{result.amountUsd.toFixed(2)} USDT/USDC</p>
-                      <p className="mt-3 text-white/50">{t.checkout.cryptoAddress}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="break-all text-xs">{result.address}</span>
-                        <button
-                          onClick={handleCopyAddress}
-                          className="flex-shrink-0 rounded border border-white/30 px-2 py-1 text-[11px] hover:border-white"
-                        >
-                          {copied ? t.checkout.copied : t.checkout.copyAddress}
-                        </button>
-                      </div>
-                    </div>
-
-                    <p className="mx-auto mt-3 max-w-sm text-[11px] text-amber-500">{t.checkout.networkFeeWarning}</p>
-
-                    <button
-                      onClick={handleConfirmPaid}
-                      className="mt-4 rounded bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90"
-                    >
-                      {t.checkout.iHavePaid}
-                    </button>
-                  </>
-                )
+              {contactLinks.length > 0 ? (
+                <div className="mx-auto mt-6 max-w-sm">
+                  <p className="text-xs font-semibold uppercase text-white/50">{t.checkout.contactSeller}</p>
+                  <div className="mt-3 flex flex-col gap-2">
+                    {contactLinks.map((l) => (
+                      <a
+                        key={l.label}
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center justify-center gap-2 rounded py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 ${l.bg}`}
+                      >
+                        {l.icon}
+                        {l.tooltip}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               ) : null}
 
               <Link
@@ -514,42 +412,10 @@ export default function CheckoutPage() {
 
               <div className="mt-6 border-t border-white/10 pt-4">
                 <p className="text-sm font-semibold">{t.checkout.paymentMethod}</p>
-                <div className="mt-3 flex flex-col gap-2">
-                  {METHODS.map((key) => (
-                    <label
-                      key={key}
-                      className={`flex cursor-pointer items-center gap-3 rounded border px-4 py-3 text-sm transition-colors ${
-                        method === key ? "border-white bg-white/10" : "border-white/15 hover:border-white/40"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="payment-method"
-                        value={key}
-                        checked={method === key}
-                        onChange={() => setMethod(key)}
-                      />
-                      {t.checkout.methods[key]}
-                    </label>
-                  ))}
+                <div className="mt-3 rounded border border-white bg-white/10 px-4 py-3 text-sm">
+                  <p className="font-medium">{t.checkout.methods.cod}</p>
+                  <p className="mt-1 text-xs text-white/60">{t.checkout.codOnlyNote}</p>
                 </div>
-
-                {method === "crypto" ? (
-                  <div className="mt-3 flex items-center gap-3 text-sm">
-                    <span className="text-white/60">{t.checkout.chooseNetwork}:</span>
-                    {NETWORKS.map((n) => (
-                      <button
-                        key={n.key}
-                        onClick={() => setNetwork(n.key)}
-                        className={`rounded-full border px-3 py-1 text-xs ${
-                          network === n.key ? "border-white bg-white text-black" : "border-white/20 text-white/60 hover:border-white/50"
-                        }`}
-                      >
-                        {n.label}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
               </div>
 
               {error ? <p className="mt-4 text-center text-xs text-red-400">{error}</p> : null}

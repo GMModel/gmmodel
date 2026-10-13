@@ -20,35 +20,13 @@ export default function CheckoutResultPage() {
     if (!orderCode) return;
 
     async function run() {
-      // If MoMo redirected the browser back here, it appended the same signed
-      // fields as its IPN webhook — verify + apply them directly so payment
-      // status updates even without a public HTTPS ipnUrl (e.g. on localhost).
-      if (searchParams.get("resultCode") !== null) {
-        const momoParams = Object.fromEntries(searchParams.entries());
-        await fetch("/api/payments/momo/confirm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(momoParams),
-        }).catch(() => {});
-      }
-
-      // PayPal redirects back with ?token=<paypal order id>&PayerID=... once
-      // approved (or ?cancelled=1 if the buyer backed out).
-      if (searchParams.get("token") !== null && searchParams.get("cancelled") === null) {
-        await fetch("/api/payments/paypal/confirm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderCode }),
-        }).catch(() => {});
-      }
-
       const res = await fetch(`/api/orders/${orderCode}`);
       if (res.ok) setOrder(await res.json());
       setChecking(false);
     }
 
     run();
-  }, [orderCode, searchParams]);
+  }, [orderCode]);
 
   async function refresh() {
     setChecking(true);

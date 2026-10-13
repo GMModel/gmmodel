@@ -7,7 +7,8 @@ import { validateCoupon } from "@/lib/coupons";
 import { resolveSelection, selectionText } from "@/lib/variants";
 import { getFirstOrderDiscount, FIRST_ORDER_CODE } from "@/lib/firstOrder";
 
-const PAYMENT_METHODS = ["cod", "momo", "crypto", "paypal", "card"];
+// Cash on delivery only: the shop's staff call to confirm every order.
+const PAYMENT_METHODS = ["cod"];
 
 export async function GET() {
   const user = await getCurrentUser();

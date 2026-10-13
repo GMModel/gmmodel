@@ -9,8 +9,8 @@ import { useWishlist } from "@/context/WishlistContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWidgets from "@/components/FloatingWidgets";
-import ModelThumb from "@/components/ModelThumb";
-import { imageAtWidth } from "@/lib/imageUrl";
+import ProductGallery from "@/components/ProductGallery";
+import ProductCard from "@/components/ProductCard";
 import { BODY_STYLES } from "@/lib/bodyStyles";
 import { pickLabel, pickProductName, pickProductDescription } from "@/lib/i18n";
 
@@ -21,17 +21,21 @@ export default function ProductDetailClient({ params }) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [product, setProduct] = useState(undefined);
   const [added, setAdded] = useState(false);
-  const [activeImage, setActiveImage] = useState(""); // gallery thumbnail the customer clicked
+  const [related, setRelated] = useState([]);
   const [picked, setPicked] = useState({}); // { <group name>: <value label> }
 
   useEffect(() => {
     setProduct(undefined);
     setPicked({});
-    setActiveImage("");
+    setRelated([]);
     fetch(`/api/products/${slug}`)
       .then((res) => (res.ok ? res.json() : null))
       .then(setProduct)
       .catch(() => setProduct(null));
+    fetch(`/api/products/${slug}/related?limit=8`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setRelated)
+      .catch(() => setRelated([]));
   }, [slug]);
 
   if (product === undefined) {
@@ -82,9 +86,8 @@ export default function ProductDetailClient({ params }) {
   const optionImage = selection.ok ? [...selection.chosen].reverse().find((c) => c.value.imageUrl)?.value.imageUrl : "";
   const unitPriceUsd = product.priceUsd + extraUsd;
 
-  // Main image: a clicked thumbnail wins, else the chosen option's own image, else the product image.
-  const shownImage = activeImage || optionImage || product.imageUrl;
-  const thumbnails = [...new Set([optionImage || product.imageUrl, ...(product.galleryUrls ?? [])].filter(Boolean))];
+  // Gallery photos: the chosen option's own image (or the product image) first, then the rest.
+  const images = [...new Set([optionImage || product.imageUrl, ...(product.galleryUrls ?? [])].filter(Boolean))];
 
   function handleAddToCart() {
     const variant = groups.length && selection.ok
@@ -123,53 +126,31 @@ export default function ProductDetailClient({ params }) {
           </Link>
 
           <div className="mt-4 grid grid-cols-1 gap-8 md:grid-cols-2">
-            <div>
-              <div className="relative overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
-                <ModelThumb
-                  color={product.imageColor}
-                  src={shownImage}
-                  width={1200}
-                  priority
-                  alt={name}
-                  scaleLabel={product.scale?.label}
-                  className="h-80 w-full md:h-[420px]"
-                />
-                {product.badge ? (
-                  <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-1 text-xs font-bold">{product.badge}</span>
-                ) : null}
-                <button
-                  aria-label="wishlist"
-                  onClick={() => toggleWishlist(product)}
-                  className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 transition-colors hover:bg-black/70 ${
-                    favorited ? "text-red-500" : "text-white hover:text-red-500"
-                  }`}
-                >
-                  <svg className="h-5 w-5" fill={favorited ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21l-7.682-8.318a4.5 4.5 0 010-6.364z" />
-                  </svg>
-                </button>
-              </div>
-
-              {thumbnails.length > 1 ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {thumbnails.map((url, i) => (
-                    <button
-                      key={`${url}-${i}`}
-                      type="button"
-                      aria-label={`${name} ${i + 1}`}
-                      aria-pressed={url === shownImage}
-                      onClick={() => setActiveImage(url)}
-                      className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded border bg-neutral-950 ${
-                        url === shownImage ? "border-red-500" : "border-white/10 hover:border-white/40"
-                      }`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imageAtWidth(url, 160)} alt="" loading="lazy" className="h-full w-full object-contain" />
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+            <ProductGallery
+              images={images}
+              name={name}
+              color={product.imageColor}
+              scaleLabel={product.scale?.label}
+              resetKey={`${product.id}|${optionImage}`}
+              overlay={
+                <>
+                  {product.badge ? (
+                    <span className="absolute left-3 top-3 rounded bg-red-600 px-2 py-1 text-xs font-bold">{product.badge}</span>
+                  ) : null}
+                  <button
+                    aria-label="wishlist"
+                    onClick={() => toggleWishlist(product)}
+                    className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 transition-colors hover:bg-black/70 ${
+                      favorited ? "text-red-500" : "text-white hover:text-red-500"
+                    }`}
+                  >
+                    <svg className="h-5 w-5" fill={favorited ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21l-7.682-8.318a4.5 4.5 0 010-6.364z" />
+                    </svg>
+                  </button>
+                </>
+              }
+            />
 
             <div className="flex flex-col gap-4">
               <div>
@@ -208,7 +189,6 @@ export default function ProductDetailClient({ params }) {
                             aria-pressed={active}
                             onClick={() => {
                               setPicked((p) => ({ ...p, [g.name]: v.label }));
-                              setActiveImage("");
                             }}
                             className={`h-9 w-9 rounded-full border-2 transition ${active ? "border-red-500 ring-2 ring-red-500/40" : "border-white/30 hover:border-white"}`}
                             style={{ backgroundColor: v.color }}
@@ -220,7 +200,6 @@ export default function ProductDetailClient({ params }) {
                             aria-pressed={active}
                             onClick={() => {
                               setPicked((p) => ({ ...p, [g.name]: v.label }));
-                              setActiveImage("");
                             }}
                             className={`rounded border px-3 py-2 text-sm font-medium transition ${active ? "border-red-500 bg-red-600/20 text-white" : "border-white/30 text-white/80 hover:border-white"}`}
                           >
@@ -285,6 +264,17 @@ export default function ProductDetailClient({ params }) {
               <h2 className="text-xs font-bold uppercase text-white/60">{t.productDetail.description}</h2>
               <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-white/80">{description}</p>
             </div>
+          ) : null}
+
+          {related.length > 0 ? (
+            <section className="mt-12">
+              <h2 className="text-lg font-black tracking-tight md:text-xl">{t.productDetail.related}</h2>
+              <div className="mt-4 grid grid-cols-2 gap-4 text-left md:grid-cols-4">
+                {related.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
           ) : null}
         </div>
       </main>

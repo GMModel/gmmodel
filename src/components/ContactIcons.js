@@ -3,7 +3,7 @@
 import { useStore } from "@/context/StoreContext";
 import { phoneDigits, intlDigits } from "@/lib/contentUtils";
 
-function buildLinks(t, settings) {
+export function buildLinks(t, settings) {
   const PHONE_DISPLAY = settings.phone;
   const PHONE_TEL = (settings.phone.trim().startsWith("+") ? "+" : "") + phoneDigits(settings.phone);
   const ZALO_INTL = intlDigits(settings.zalo) || intlDigits(settings.phone);

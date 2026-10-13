@@ -21,7 +21,6 @@ const SOCIAL_ICONS = [
 export default function Footer() {
   const { t, locale, settings, footer } = useStore();
   const columns = (footer ?? { columns: defaultFooterColumns() }).columns;
-  const payments = settings.payments.split(",").map((p) => p.trim()).filter(Boolean);
   const socials = SOCIAL_ICONS.filter((s) => settings[s.key]);
   const year = new Date().getFullYear();
 
@@ -97,17 +96,10 @@ export default function Footer() {
         ))}
       </div>
 
-      <div className="mx-auto flex max-w-[1336px] flex-col items-center justify-between gap-4 py-6 text-xs text-white/40 md:flex-row">
+      <div className="mx-auto flex max-w-[1336px] items-center justify-center py-6 text-center text-xs text-white/40">
         <span>
           © {year} {t.brand}. {t.footer.rights}
         </span>
-        <div className="flex flex-wrap items-center gap-2">
-          {payments.map((p) => (
-            <span key={p} className="rounded border border-white/15 px-2 py-1">
-              {p}
-            </span>
-          ))}
-        </div>
       </div>
     </footer>
   );
