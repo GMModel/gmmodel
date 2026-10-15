@@ -12,7 +12,7 @@ function Wrap({ f, children }) {
   return f.image ? <div className="block">{children}</div> : <label className="block">{children}</label>;
 }
 
-const GROUP_ORDER = ["Logo & Favicon", "Liên hệ", "Nút liên hệ nổi", "Mạng xã hội", "Thanh toán", "SEO", "Trang chủ", "Ưu đãi"];
+const GROUP_ORDER = ["Logo & Favicon", "Liên hệ", "Thông báo đơn hàng", "Nút liên hệ nổi", "Mạng xã hội", "SEO", "Trang chủ", "Ưu đãi"];
 const GROUPS = [...new Set(SETTING_FIELDS.map((f) => f.group))].sort(
   (a, b) => (GROUP_ORDER.indexOf(a) + 100) % 100 - (GROUP_ORDER.indexOf(b) + 100) % 100,
 );
@@ -32,6 +32,27 @@ export default function SettingsTab() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+
+  async function handleTestEmail() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/admin/test-email", { method: "POST" });
+      const data = await res.json();
+      setTestResult(
+        data.ok
+          ? { ok: true, text: `Đã gửi email thử tới ${data.to}. Hãy kiểm tra hộp thư (cả mục Spam).` }
+          : { ok: false, text: data.error || "Không gửi được email thử." },
+      );
+    } catch {
+      setTestResult({ ok: false, text: "Không gọi được máy chủ, thử lại sau." });
+    } finally {
+      setTesting(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -114,6 +135,24 @@ export default function SettingsTab() {
                   </Wrap>
                 ))}
               </div>
+              {group === "Thông báo đơn hàng" ? (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={handleTestEmail}
+                    disabled={testing}
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    {testing ? "Đang gửi…" : "Gửi email thử"}
+                  </button>
+                  <p className="mt-2 text-xs text-slate-500">Bấm &quot;Lưu cài đặt&quot; trước nếu bạn vừa đổi địa chỉ email.</p>
+                  {testResult ? (
+                    <p className={`mt-2 rounded-lg px-3 py-2 text-sm ${testResult.ok ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+                      {testResult.text}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
           ))}
         </div>
