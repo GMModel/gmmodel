@@ -79,7 +79,7 @@ export default function SettingsTab() {
         <div>
           <h2 className="text-xl font-bold">Cài đặt</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Logo, favicon, số điện thoại (chữ tuỳ ý), các nút Zalo/WhatsApp/gọi điện nổi (đổi link, bật/tắt), email, địa chỉ, mạng xã hội, thanh toán và SEO. Để trống logo = dùng logo mặc định. Mạng xã hội để trống sẽ không hiển thị ở chân trang.
+            Logo, favicon, số điện thoại (chữ tuỳ ý), các nút Zalo/WhatsApp/gọi điện nổi (đổi link, bật/tắt), email, địa chỉ, email nhận thông báo đơn hàng, mạng xã hội và SEO. Để trống logo = dùng logo mặc định. Mạng xã hội để trống sẽ không hiển thị ở chân trang.
           </p>
         </div>
         <button
